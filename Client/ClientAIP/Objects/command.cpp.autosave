@@ -1,0 +1,16 @@
+#include "command.h"
+
+Command::Command(QObject *parent) : QObject(parent)
+{
+	
+}
+
+void Command::write(QTcpSocket *socket)
+{
+	
+}
+
+void Command::read(QTcpSocket *socket)
+{
+	
+}

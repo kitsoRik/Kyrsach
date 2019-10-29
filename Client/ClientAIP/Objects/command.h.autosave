@@ -1,0 +1,31 @@
+#ifndef COMMAND_H
+#define COMMAND_H
+
+#include <QObject>
+#include <QTcpSocket>
+
+class Command : public QObject
+{
+	Q_OBJECT
+public:
+	enum Title 
+	{
+		Confirm,
+		Control
+	};
+	
+	explicit Command(QObject *parent = nullptr);
+signals:
+
+public slots:
+	void write(QTcpSocket *socket);
+	void read(QTcpSocket *socket);
+	
+private slots:
+	void parseCommand(const QByteArray &array);
+	
+private:
+	int m_title;
+};
+
+#endif // COMMAND_H

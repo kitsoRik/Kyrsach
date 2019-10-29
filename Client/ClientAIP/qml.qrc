@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>QML/Panels/ConnectPanel/ConnectPanel.qml</file>
+        <file>QML/Panels/Home/HomePanel.qml</file>
+        <file>QML/Panels/Home/AddItemPanel.qml</file>
+        <file>QML/Panels/Home/EditItemPanel.qml</file>
+        <file>QML/Panels/Home/EditRoomPanel.qml</file>
+    </qresource>
+</RCC>
