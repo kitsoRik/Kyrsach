@@ -34,7 +34,7 @@ public slots:
 	void connectToControler(const QString &key, const QString &password);
 
 	void addRoom();
-	void addItem(const int &pin, const QString &type, const QString &roomName);
+	void addItem(const QList<int> &pins, const QString &type, const QString &roomName);
 	void turnItem(const Item &item);
 	void updateItems();
 	void updateRooms();
@@ -43,6 +43,8 @@ private slots:
 	void onConnected();
 	void onDisconnected();
 	void onReadyRead();
+	void onReadyReadCheck(QByteArray data);
+	void onReadyReadProccess(QByteArray data);
 private:
 	QTcpSocket *m_socket;
 

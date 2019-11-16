@@ -2,6 +2,8 @@
 #include "client.h"
 #include "qtitems.h"
 #include "qtroom.h"
+#include <QFile>
+#include <QBuffer>
 
 QtItem::QtItem(QtItems *items) : QObject(items), m_firstName(false)
 {
@@ -11,6 +13,19 @@ QtItem::QtItem(QtItems *items) : QObject(items), m_firstName(false)
 
 void QtItem::setItem(const Item &item)
 {
+	QFile file("Q:/123.txt");
+	file.open(QIODevice::ReadWrite);
+	file.resize(0);
+
+	for(int i = 0; i < item.dataSize; i++)
+	{
+		int a = item.data[i];
+		file.write((QString::number(a) + " ").toUtf8());
+	}
+	file.close();
+
+	QImage img = QImage::fromData(item.data, item.dataSize);
+	setImage(img);
 	bool changed = m_item.on != item.on;
 	m_item = item;
 
@@ -39,7 +54,7 @@ void QtItem::setItem(const Item &item)
 
 int QtItem::pin() const
 {
-	return m_item.pin;
+	return m_item.pins[0];
 }
 
 int QtItem::type() const
@@ -62,6 +77,8 @@ QString QtItem::typeString() const
 			return "SERVO";
 		case Item::MagSig:
 			return "MAGSIG";
+		case Item::Camera:
+			return "CAMERA";
 		default:
 			return "UNKNOWN";
 	}
@@ -133,9 +150,41 @@ void QtItem::turnMagSig()
 	client->clientSocket()->turnItem(item);
 }
 
+void QtItem::turnCamera()
+{
+	Client *client = Client::instance();
+	Item item = m_item;
+
+	item.on = true;
+	item.type = Item::Camera;
+
+	client->clientSocket()->turnItem(item);
+}
+
 void QtItem::addLed()
 {
 	Client *client = Client::instance();
+}
+
+QString QtItem::image() const
+{
+	QByteArray bArray;
+	QBuffer buffer(&bArray);
+	buffer.open(QIODevice::WriteOnly);
+	m_image.save(&buffer, "JPEG");
+
+	QString imageStr("data:image/jpg;base64,");
+	imageStr.append(QString::fromLatin1(bArray.toBase64().data()));
+
+	return imageStr;
+}
+
+void QtItem::setImage(const QImage &image)
+{
+	 // Some init code to setup the image (e.g. loading a PGN/JPEG, etc.)
+
+	m_image = image;
+	emit imageChanged();
 }
 
 QString QtItem::name() const

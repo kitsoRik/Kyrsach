@@ -17,29 +17,30 @@ public:
 	char* array;
 
 	Buffer();
-	Buffer(char *s);
-	Buffer(const char *s);
-	Buffer(const std::string &str);
-	Buffer(const char* s, const unsigned int &size);
+	Buffer(const Buffer &buffer);
+	Buffer(char* s);
+	Buffer(const char* s);
+	Buffer(const std::string& str);
+	Buffer(const char* s, const unsigned int& size);
 
 	void append(const char& c);
-	void append(const char* c, const unsigned int &size);
-	void resize(const unsigned int &size);
+	void append(const char* c, const unsigned int& size);
+	void resize(const unsigned int& size);
 
-	unsigned int fullSize() { return size + sizeof (int);}
+	unsigned int fullSize() { return size + sizeof(int); }
 
 	char* toBytes();
-	static Buffer fromBytes(char *s);
+	static Buffer fromBytes(const char *s);
 
 	std::vector<std::string> split(const char sep);
 
-	static Buffer fromUtf8(const std::string &str);
-	static Buffer fromUtf8(const char *s);
-	static Buffer fromUtf8(const char *s, const int size);
-	static Buffer fromUtf8(const char *s, const unsigned int size);
+	static Buffer fromUtf8(const std::string& str);
+	static Buffer fromUtf8(const char* s);
+	static Buffer fromUtf8(const char* s, const int size);
+	static Buffer fromUtf8(const char* s, const unsigned int size);
 
-	friend BufferStream &operator <<(BufferStream &stream, const Buffer &buffer);
-	friend BufferStream &operator >>(BufferStream &stream, Buffer &buffer);
+	friend BufferStream& operator <<(BufferStream& stream, const Buffer& buffer);
+	friend BufferStream& operator >>(BufferStream& stream, Buffer& buffer);
 
 	char& operator[](const unsigned int& index);
 	operator const char* ();
@@ -55,10 +56,15 @@ public:
 		ReadWrite
 	};
 
-	BufferStream(Buffer *buffer, const TypeStream &typeStream);
+	BufferStream(Buffer* buffer, const TypeStream& typeStream);
 
-	BufferStream& writeString(const char* s, const unsigned int& size);
+	BufferStream& writeString(const char* s);
 	BufferStream& readString(char*& s);
+
+	BufferStream& writeData(const unsigned char* s, const unsigned int& size);
+	BufferStream& writeData(const char* s, const unsigned int& size);
+	BufferStream& readData(unsigned char*& s, unsigned int&size);
+	BufferStream& readData(char*& s, unsigned int& size);
 
 	BufferStream& operator <<(const char& c);
 	BufferStream& operator <<(const unsigned char& c) { return *this << char(c); }
@@ -95,7 +101,7 @@ private:
 	unsigned int m_readIndex;
 	unsigned int m_writeIndex;
 
-	Buffer *m_buffer;
+	Buffer* m_buffer;
 
 	TypeStream m_typeStream;
 };

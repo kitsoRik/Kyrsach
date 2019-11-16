@@ -8,9 +8,9 @@
 #endif
 
 #if defined(Q_OS_WIN)
-const QString HOST = "31.131.31.228";
+const QString HOST = "192.168.0.106";
 #elif defined(Q_OS_ANDROID)
-const QString HOST = "31.131.31.228";
+const QString HOST = "192.168.0.106";
 #endif
 const int PORT = 3000;
 
@@ -39,7 +39,7 @@ void ClientSocket::connectToControler(const QString &key, const QString &passwor
 	Command command(Command::Connect2Controler, (key + '|' + password).toStdString());
 
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
 void ClientSocket::addRoom()
@@ -51,48 +51,60 @@ void ClientSocket::addRoom()
 
 	Command command(Command::Control, Command::AddRoom, room.toBuffer());
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
-void ClientSocket::addItem(const int &pin, const QString &type, const QString &roomName)
+void ClientSocket::addItem(const QList<int> &pins, const QString &type, const QString &roomName)
 {
 	Item item;
-	item.pin = pin;
+	item.pins.resize(pins.size());
+	for(int i =0; i < pins.size(); i++)
+		item.pins[i] = pins[i];
 	item.roomName = roomName.toStdString();
-	item.type = type == "LED" ? Item::Led : type == "SERVO" ? Item::Servo : Item::MagSig;
+	qDebug() << pins;
+	qDebug() << item.pins;
+	if(type == "LED")
+		item.type = Item::Led;
+	else if(type == "SERVO")
+		item.type = Item::Servo;
+	else if(type == "MAGSIG")
+		item.type = Item::MagSig;
+	else
+		item.type = Item::Camera;
 	item.monitor = type == "MAGSIG";
 
 	Command command(Command::Control, Command::AddItem, item.toBuffer());
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	qDebug() << "ADD" << type;
 }
 
 void ClientSocket::turnItem(const Item &item)
 {
 	Command command(Command::Control, Command::TurnItem, item.toBuffer());
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
 void ClientSocket::updateItems()
 {
 	Command command(Command::Control, Command::UpdateItems);
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
 void ClientSocket::updateRooms()
 {
 	Command command(Command::Control, Command::UpdateRooms);
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
 void ClientSocket::onConnected()
 {
 	qDebug() << "CLIENT CONNECTED";
 	Buffer buffer = Command(Command::Confirm, Command::Android, "KEYROSTIK").toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
 
 	m_connectedToServer = true;
 	emit connectedToServerChanged();
@@ -107,8 +119,51 @@ void ClientSocket::onDisconnected()
 
 void ClientSocket::onReadyRead()
 {
-	auto data = m_socket->readAll();
-	Buffer buffer = Buffer::fromUtf8(data, data.size());
+	QByteArray data = m_socket->readAll();
+	onReadyReadCheck(data);
+}
+
+void ClientSocket::onReadyReadCheck(QByteArray data)
+{
+	static int alldatasize = 0;
+	static bool writedata = false;
+	static QByteArray allData = "";
+	if(allData.isEmpty())
+	{
+		writedata = true;
+		char* temp_size = new char[4];
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			temp_size[i] = data[i];
+		}
+
+
+		alldatasize = *reinterpret_cast<unsigned int*>(temp_size) + 4;
+
+	}
+
+	if(!writedata)
+		return;
+	allData += data;
+	qDebug() << "SUM" << allData.size();
+	if(allData.size() == alldatasize)
+	{
+		writedata = false;
+		onReadyReadProccess(allData);
+		allData.clear();
+	}else if(allData.size() > alldatasize)
+	{
+		QByteArray firstData = allData.left(alldatasize);
+		onReadyReadProccess(firstData);
+		QByteArray secondData = allData.right(allData.size() - firstData.size());
+		allData.clear();
+		onReadyReadCheck(secondData);
+	}
+}
+
+void ClientSocket::onReadyReadProccess(QByteArray data)
+{
+	Buffer buffer = Buffer::fromBytes(data);
 	Commands commands = Commands::fromBuffer(buffer);
 
 	for(unsigned int i = 0; i < commands.commands.size(); i++)
@@ -145,7 +200,6 @@ void ClientSocket::onReadyRead()
 					case Command::TriggeredItem:
 					{
 						Item item = Item::fromBuffer(c.buffer());
-						qDebug() << "TRIGG" << item.pin;
 						break;
 					}
 					default:

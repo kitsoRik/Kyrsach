@@ -5,6 +5,7 @@
 #include "item.h"
 #include <Static/message.h>
 #include "itemactions.h"
+#include <QImage>
 
 class QtItems;
 class QtRoom;
@@ -22,6 +23,7 @@ class QtItem : public QObject
 	Q_PROPERTY(QtRoom* room READ room CONSTANT)
 
 	Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+	Q_PROPERTY(QString image READ image NOTIFY imageChanged)
 
 	friend class QtItems;
 public:
@@ -41,6 +43,9 @@ public:
 	QString name() const;
 	void setName(const QString &name);
 
+	QString image() const;
+	void setImage(const QImage &image);
+
 signals:
 	void pinChanged();
 	void typeChanged();
@@ -48,6 +53,7 @@ signals:
 	void onChanged();
 
 	void nameChanged();
+	void imageChanged();
 
 public slots:
 	void turn();
@@ -55,6 +61,7 @@ public slots:
 	void turnLed();
 	void turnServo(const int &angle);
 	void turnMagSig();
+	void turnCamera();
 
 	static void addLed();
 
@@ -62,6 +69,7 @@ private:
 	QtItems *m_items;
 	Item m_item;
 	ItemActions *m_itemActions;
+	QImage m_image;
 
 	bool m_firstName;
 	QString m_name;

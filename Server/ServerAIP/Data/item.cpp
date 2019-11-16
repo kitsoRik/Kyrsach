@@ -1,8 +1,10 @@
 #include "item.h"
+#include <sstream>
 
 Item::Item()
 {
 	type = 0;
+	dataSize = 0;
 }
 
 Buffer Item::toBuffer() const
@@ -27,29 +29,44 @@ BufferStream &operator <<(BufferStream &stream, const Item &item)
 	stream << item.roomName;
 	stream << item.identifier;
 	stream << item.type;
-	stream << item.pin;
+	stream << (int)item.pins.size();
+	for(int i = 0; i < item.pins.size(); i++)
+		stream << item.pins[i];
 	stream << item.angle;
 	stream << item.on;
 	stream << item.monitor;
+	unsigned int t = item.dataSize;
+	stream.writeData(item.data, t);
 	return stream;
 }
-
 BufferStream &operator >>(BufferStream &stream, Item &item)
 {
 	stream >> item.roomIdentifier;
 	stream >> item.roomName;
 	stream >> item.identifier;
 	stream >> item.type;
-	stream >> item.pin;
+	int size;
+	stream >> size;
+	item.pins.resize(size);
+	for(int i = 0; i < size; i++)
+		stream >> item.pins[i];
 	stream >> item.angle;
 	stream >> item.on;
 	stream >> item.monitor;
+	unsigned int t;
+	stream.readData(item.data, t);
+	item.dataSize = t;
 	return stream;
 }
 
 Item* Items::addItem(const Item& it)
 {
+	static int n = 0;
+	std::stringstream ss;
+	ss << n++;
+
 	Item *item = new Item(it);
+	item->identifier = ss.str();
 	m_items.push_front(item);
 
 	return item;

@@ -1,7 +1,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include "Data/buffer.h"
+#include "buffer.h"
 #include <string>
 
 class Commands;

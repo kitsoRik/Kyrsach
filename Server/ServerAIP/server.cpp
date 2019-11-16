@@ -11,11 +11,12 @@ Server::Server(QObject *parent) : QObject(parent)
 
 	connect(m_server, &QTcpServer::newConnection, this, &Server::onNewConnection);
 
-	if(!m_server->listen(QHostAddress::Any, PORT))
+	if(!m_server->listen(QHostAddress("192.168.0.106"), PORT))
 	{
 		qDebug() << "Error listen server: " <<  m_server->errorString();
 		qApp->quit();
 	}
+	qDebug() << m_server->serverAddress();
 
 	qDebug() << "Listening " << QString::number(PORT) + " port..";
 

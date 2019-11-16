@@ -13,17 +13,20 @@ public:
 	enum ItemType{
 		Led,
 		Servo,
-		MagSig
+		MagSig,
+		Camera
 	};
 
 	std::string roomIdentifier;
 	std::string roomName;
 	std::string identifier;
-	int pin;
+	std::vector<int> pins;
 	int type;
 	int angle;
 	bool on;
 	bool monitor;
+	unsigned char *data;
+	int dataSize;
 
 	Item();
 

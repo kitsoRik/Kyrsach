@@ -2,6 +2,7 @@
 #define ROOM_H
 
 #include "item.h"
+#include <cstdlib>
 
 class Room
 {
@@ -20,6 +21,18 @@ public:
 
 	friend BufferStream& operator <<(BufferStream &stream, const Room &room);
 	friend BufferStream& operator >>(BufferStream &stream, Room &room);
+
+private:
+	static std::string generateIdentifier()
+	{
+		std::string s;
+		for(int i = 0; i < 8; i++)
+		{
+			char c = rand() % 26 + 62;
+			s += c;
+		}
+		return s;
+	}
 };
 
 class Rooms
@@ -37,6 +50,8 @@ public:
 
 	friend BufferStream& operator <<(BufferStream &stream, const Rooms &rooms);
 	friend BufferStream& operator >>(BufferStream &stream, Rooms &rooms);
+
+
 };
 
 #endif // ROOM_H

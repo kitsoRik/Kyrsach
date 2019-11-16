@@ -41,6 +41,8 @@ private slots:
 	void onConnected();
 	void onDisconnected();
 	void onReadyRead();
+	void onReadyReadCheck(QByteArray data);
+	void onReadyReadProccess(QByteArray data);
 
 	void onReadyCommand(const Command &command);
 

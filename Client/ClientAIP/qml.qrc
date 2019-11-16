@@ -6,5 +6,6 @@
         <file>QML/Panels/Home/AddItemPanel.qml</file>
         <file>QML/Panels/Home/EditItemPanel.qml</file>
         <file>QML/Panels/Home/EditRoomPanel.qml</file>
+        <file>QML/Panels/Home/CameraViewPanel.qml</file>
     </qresource>
 </RCC>

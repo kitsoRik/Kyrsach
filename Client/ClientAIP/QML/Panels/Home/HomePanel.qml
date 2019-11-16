@@ -203,10 +203,16 @@ Rectangle {
                     z: -1;
 
                     onClicked: {
+                        console.log("C");
                         if(parent.qtItem.type == "LED")
                             parent.qtItem.turnLed();
                         if(parent.qtItem.type == "MAGSIG")
                             parent.qtItem.turnMagSig();
+                        if(parent.qtItem.type == "CAMERA")
+                        {
+                            cameraViewPanel.qtItem = parent.qtItem;
+                            cameraViewPanel.visible = true;
+                        }
                     }
                 }
             }
@@ -248,5 +254,13 @@ Rectangle {
 
         anchors.fill: parent;
         z: 1;
+    }
+
+    CameraViewPanel {
+        id: cameraViewPanel;
+        visible: false;
+        anchors.fill: parent;
+
+
     }
 }

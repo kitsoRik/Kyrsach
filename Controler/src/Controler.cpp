@@ -14,14 +14,13 @@ Controler::Controler(const char *ssid, const char *password, const char* host)
     m_instance = this;
 
     m_client = new WiFiClient();
+    m_rooms = new Rooms;
 
     if (connectToWifi(1000))
     {
         delay(1000);
         connectToHost(1000);
     }
-
-    m_rooms = new Rooms;
 }
 
 bool Controler::connectToWifi(const int &wait)
@@ -115,6 +114,8 @@ bool Controler::checkAvailable()
 void Controler::readAvailable()
 {
     Buffer buffer;
+    for(int i = 0; i < 4; i++)
+        m_client->read();
     while (m_client->available())
     {
         buffer.append((char)m_client->read());
@@ -140,7 +141,7 @@ void Controler::monitorChanges()
             ArduinoObject *object;
             for(ArduinoObject *obj : m_objects)
             {
-                if(obj->pin() == item->pin)
+                if(obj->pin() == item->pins[0])
                 {
                     object = obj;
                     break;
@@ -149,7 +150,7 @@ void Controler::monitorChanges()
             if(object == nullptr)
             {
                 Serial.print("NULL OF ");
-                Serial.print(item->pin);
+                Serial.print(item->pins[0]);
                 Serial.println(" PIN");
                 continue;
             }
@@ -179,6 +180,7 @@ void Controler::monitorChanges()
 
 void Controler::parseCommand(const Command &command)
 {
+    Serial.println("PC1");
     switch (command.title())
     {
     case Command::Control:
@@ -197,29 +199,49 @@ void Controler::parseCommand(const Command &command)
         {
             Item temp_item = Item::fromBuffer(command.buffer());
             Room* room = m_rooms->roomFromIdentifier(temp_item.roomIdentifier);
+          
             Item *item = room->addItem(temp_item);
             ArduinoObject *object;
             if (item->type == Item::Led)
             {
                 Serial.print("ADD LED: ");
-                Serial.println(item->pin);
-                object = new LedObject(item->pin);
+                Serial.println(item->pins[0]);
+                object = new LedObject(item->pins[0]);
             }
             else if (item->type == Item::Servo)
             {
-                object = new ServoObject(item->pin);
+                object = new ServoObject(item->pins[0]);
                 static_cast<ServoObject *>(object)->rotate(90);
             }else if(item->type == Item::MagSig)
             {
                 Serial.print("ADD MAGSIG: ");
-                Serial.println(item->pin);
+                Serial.println(item->pins[0]);
                 item->monitor = true;
-                object = new MagSigObject(item->pin);
+                object = new MagSigObject(item->pins[0]);
+            }else if(item->type == Item::Camera)
+            {
+                Serial.println("SADD CAMERA");
+                object = new ArduinoCameraOV7670Object(item->pins[0], 
+                item->pins[1], 
+                item->pins[2], 
+                item->pins[3], 
+                item->pins[4], 
+                item->pins[5], 
+                item->pins[6], 
+                item->pins[7], 
+                item->pins[8], 
+                item->pins[9], 
+                item->pins[10], 
+                item->pins[11], 
+                item->pins[12], 
+                item->pins[13]);
+                Serial.println("SADD CAMERA");
             }else 
             {
                 Serial.println("ADD ERROR");
                 return;
             }
+            object->setIdentifier(item->identifier);
             m_objects.push_back(object);
             updateRooms();
             break;
@@ -232,11 +254,13 @@ void Controler::parseCommand(const Command &command)
             Item *item = room->items.itemFromIdentifier(temp_item.identifier);
             
             Serial.println(temp_item.type);
-            Serial.println(temp_item.pin);
+            Serial.println(temp_item.pins[0]);
             for (ArduinoObject *obj : m_objects)
             {
-                if (obj->pin() == temp_item.pin)
+                if (obj->identifier() == temp_item.identifier)
                 {
+                    Serial.print("CHECK PIN: ");
+                    Serial.println(obj->pin());
                     switch (temp_item.type)
                     {
                     case Item::Servo:
@@ -261,6 +285,26 @@ void Controler::parseCommand(const Command &command)
                         item->on = mag->value();
                         break;
                     }
+                    case Item::Camera:
+                    {
+                            Serial.println("UPDCAM1");
+                        ArduinoCameraOV7670Object *cam = static_cast<ArduinoCameraOV7670Object *>(obj);
+                        item->dataSize = 9666;
+                        cam->oneFrame();
+                            Serial.println("UPDCAM2");
+                        item->data = new unsigned char[9666];
+                            Serial.println("UPDCAM3");
+
+                            Serial.println( ArduinoCameraOV7670Object::headerSize + cam->width() * cam->height() * 2);
+
+                        for(int i = 0; i < ArduinoCameraOV7670Object::headerSize; i++)
+                            item->data[i] = ArduinoCameraOV7670Object::bmpHeader[i];
+                        for(int i = ArduinoCameraOV7670Object::headerSize; i < 9666; i++)
+                            item->data[i] = cam->frame()[i-ArduinoCameraOV7670Object::headerSize];
+                        Serial.println("UPDCAM4");
+
+                        break;
+                    }
                     default:
                         Serial.println("NO HAS TYPE");
                         return;
@@ -269,7 +313,11 @@ void Controler::parseCommand(const Command &command)
                 }
             }
             updateRooms();
-
+            if(item->dataSize != 0)
+            {
+                item->dataSize = 0;
+                delete[] item->data;
+            }
             break;
         }
         case Command::UpdateItems:
@@ -280,11 +328,10 @@ void Controler::parseCommand(const Command &command)
         }
         case Command::UpdateRooms:
         {
-            Serial.println(m_rooms->rooms.size());
             Buffer buffer = m_rooms->toBuffer();
             Command command(Command::Control, Command::UpdateRooms, buffer);
             buffer = command.toBuffer();
-            m_client->write(buffer.array, buffer.fullSize());
+            m_client->write(buffer.toBytes(), buffer.fullSize());
             break;
         }
         break;
@@ -293,7 +340,7 @@ void Controler::parseCommand(const Command &command)
     {
         Command command(Command::ConfirmConnection);
         Buffer buffer = command.toBuffer();
-        m_client->write(buffer.array, buffer.fullSize());
+        m_client->write(buffer.toBytes(), buffer.fullSize());
         break;
     }
     }
@@ -314,8 +361,11 @@ void Controler::updateRooms()
     Serial.println("1 UPD");
     Command c(Command::Control, Command::UpdateRooms, buffer);
     Buffer newb = c.toBuffer();
-    m_client->write(newb.array, newb.fullSize());
+    auto s = newb.toBytes();
+    m_client->write(s, newb.fullSize());
     Serial.println("END UPD");
+
+    Serial.println(newb.fullSize());
 }
 
 void Controler::triggerItem(const Item *item)
@@ -323,14 +373,14 @@ void Controler::triggerItem(const Item *item)
     Buffer buffer = item->toBuffer();
     Command command(Command::Control, Command::TriggeredItem, buffer);
     buffer = command.toBuffer();
-    m_client->write(buffer.array, buffer.fullSize());
+    m_client->write(buffer.toBytes(), buffer.fullSize());
 }
 
 void Controler::onConnected()
 {
     Command c(Command::Confirm, Command::Controler, m_key);
     auto ds = c.toBuffer();
-    m_client->write(ds.array, ds.fullSize());
+    m_client->write(ds.toBytes(), ds.fullSize());
 
     updateRooms();
 }

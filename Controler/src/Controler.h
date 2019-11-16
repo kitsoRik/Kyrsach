@@ -14,6 +14,7 @@
 #include "Objects/LightSensorObject.h"
 #include "Objects/TermistorObject.h"
 #include "Objects/LedObject.h"
+#include "Objects/ArduinoCameraOV7670.h"
 
 class Controler 
 {

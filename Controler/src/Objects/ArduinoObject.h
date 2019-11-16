@@ -13,7 +13,8 @@ public:
         Servo,
         Piezo,
         Led,
-        MagSig
+        MagSig,
+        Camera
     };
     explicit ArduinoObject(const int& pin);
 
@@ -33,11 +34,14 @@ public:
     inline std::string name() const { return m_name; }
     inline void setName(const std::string &name) { m_name = name; }
 
+    inline std::string identifier() const {return m_identifier;}
+    inline void setIdentifier(const std::string &id) { m_identifier = id;}
 private:
     int m_pin;
     bool m_value;
     Type m_type;
     std::string m_name;
+    std::string m_identifier;
     
 };
 

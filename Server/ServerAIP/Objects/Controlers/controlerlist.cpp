@@ -47,7 +47,7 @@ void ControlerList::addControler(Controler *controler)
 		controler->m_confirmedConnection = false;
 		Command command(Command::ConfirmConnection);
 		Buffer buffer = command.toBuffer();
-		controler->m_socket->write(buffer.array, buffer.size);
+		controler->m_socket->write(buffer.toBytes(), buffer.fullSize());
 	});
 }
 

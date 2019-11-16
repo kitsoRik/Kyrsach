@@ -13,17 +13,20 @@ public:
 	enum ItemType{
 		Led,
 		Servo,
-		MagSig
+		MagSig,
+		Camera
 	};
 
 	std::string roomIdentifier;
 	std::string roomName;
 	std::string identifier;
-	int pin;
+	std::vector<int> pins;
 	int type;
 	int angle;
 	bool on;
 	bool monitor;
+	unsigned char *data;
+	int dataSize;
 
 	Item();
 
@@ -39,13 +42,6 @@ class Items
 {
 public:
 	std::list<Item *> m_items;
-
-	~Items(){
-		for(Item *item :m_items)
-		{
-			delete item;
-		}
-	}
 
 	Item* addItem(const Item& item);
 	Item* itemFromIdentifier(const std::string& identifier);

@@ -1,5 +1,5 @@
 QT += quick network gui
-android: QT += androidextras
+android: QT += androidextras widgets
 windows: QT += widgets
 
 CONFIG += c++11

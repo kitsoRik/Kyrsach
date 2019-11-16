@@ -21,7 +21,7 @@ void SocketsList::onReadyRead()
 {
 	QTcpSocket *socket = static_cast<QTcpSocket *>(sender());
 	auto data = socket->readAll();
-	Buffer buffer = Buffer::fromUtf8(data, data.size());
+	Buffer buffer = Buffer::fromBytes(data);
 	Commands commands = Commands::fromBuffer(buffer);
 	Command command = commands.commands.front();
 	switch (command.title())

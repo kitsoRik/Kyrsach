@@ -12,6 +12,7 @@ Item* Room::addItem(const Item& it)
 	Item *item = items.addItem(it);
 	item->roomIdentifier = this->identifier;
 	item->roomName = this->name;
+	item->identifier = Room::generateIdentifier();
 	return item;
 }
 

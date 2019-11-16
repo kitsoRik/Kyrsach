@@ -5,28 +5,37 @@ Buffer::Buffer() : size(0), array(nullptr)
 
 }
 
-Buffer::Buffer(char *s)
+Buffer::Buffer(const Buffer &buffer)
+{
+	size = buffer.size;
+	this->array = new char[size];
+	for (int i = 0; i < size; i++)
+		this->array[i] = buffer.array[i];
+
+}
+
+Buffer::Buffer(char* s)
 {
 	*this = fromUtf8(static_cast<const char*>(s));
 }
 
-Buffer::Buffer(const char *s)
+Buffer::Buffer(const char* s)
 {
 	*this = fromUtf8(s);
 }
 
-Buffer::Buffer(const std::string &str)
+Buffer::Buffer(const std::string& str)
 {
 	*this = fromUtf8(str);
 }
 
-void Buffer::append(const char &c)
+void Buffer::append(const char& c)
 {
 	resize(size + 1);
 	array[size - 1] = c;
 }
 
-void Buffer::append(const char *c, const unsigned int &size)
+void Buffer::append(const char* c, const unsigned int& size)
 {
 	unsigned int oldSize = this->size;
 	resize(this->size + size);
@@ -36,7 +45,7 @@ void Buffer::append(const char *c, const unsigned int &size)
 	}
 }
 
-void Buffer::resize(const unsigned int &size)
+void Buffer::resize(const unsigned int& size)
 {
 	if (this->size == size)
 		return;
@@ -57,15 +66,15 @@ void Buffer::resize(const unsigned int &size)
 	array = s;
 }
 
-char *Buffer::toBytes()
+char* Buffer::toBytes()
 {
 	unsigned int fullSize = size + 4;
-	char *data = new char[fullSize];
-	for(unsigned int i = 0; i < 4; i++)
+	char* data = new char[fullSize];
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		data[i] = static_cast<char>(size >> i * 8);
 	}
-	for(unsigned int i = 4; i < fullSize; i++)
+	for (unsigned int i = 4; i < fullSize; i++)
 	{
 		data[i] = array[i - 4];
 	}
@@ -73,21 +82,21 @@ char *Buffer::toBytes()
 	return data;
 }
 
-Buffer Buffer::fromBytes(char *s)
+Buffer Buffer::fromBytes(const char* s)
 {
 	Buffer buffer;
 
-	char *temp_size = new char[4];
-	for(unsigned int i = 0; i < 4; i++)
+	char* temp_size = new char[4];
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		temp_size[i] = s[i];
 	}
 
 
-	buffer.size = *reinterpret_cast<unsigned int *>(temp_size);
+	buffer.size = *reinterpret_cast<unsigned int*>(temp_size);
 
 	buffer.array = new char[buffer.size];
-	for(unsigned int i = 0; i < buffer.size; i++)
+	for (unsigned int i = 0; i < buffer.size; i++)
 	{
 		buffer.array[i] = s[i + 4];
 	}
@@ -121,53 +130,50 @@ std::vector<std::string> Buffer::split(const char sep)
 	return v;
 }
 
-Buffer Buffer::fromUtf8(const std::string &str)
+Buffer Buffer::fromUtf8(const std::string & str)
 {
 	return fromUtf8(str.c_str(), static_cast<unsigned int>(str.size()));
 }
 
-Buffer Buffer::fromUtf8(const char *s)
+Buffer Buffer::fromUtf8(const char* s)
 {
 	unsigned int size = 0;
-	while(s[size++]);
+	while (s[size++]);
 	return fromUtf8(s, size);
 }
 
-Buffer Buffer::fromUtf8(const char *s, const int size)
+Buffer Buffer::fromUtf8(const char* s, const int size)
 {
 	return Buffer::fromUtf8(s, static_cast<unsigned int>(size));
 }
 
-Buffer Buffer::fromUtf8(const char *s, const unsigned int size)
+Buffer Buffer::fromUtf8(const char* s, const unsigned int size)
 {
 	Buffer buffer;
 	buffer.resize(size);
-	for(unsigned int i = 0; i < size; i++)
+	for (unsigned int i = 0; i < size; i++)
 	{
 		buffer.array[i] = s[i];
 	}
 	return buffer;
 }
 
-BufferStream &operator <<(BufferStream &stream, const Buffer &buffer)
+BufferStream& operator <<(BufferStream & stream, const Buffer & buffer)
 {
-	stream << buffer.size;
-	for(unsigned int i = 0; i < buffer.size; i++)
-	{
-		stream << buffer.array[i];
-	}
+	unsigned int size = buffer.size;
+	stream.writeData(buffer.array, size);
 
 	return stream;
 }
 
-BufferStream &operator >>(BufferStream &stream, Buffer &buffer)
+BufferStream& operator >>(BufferStream & stream, Buffer & buffer)
 {
 	unsigned int size;
 	stream >> size;
 
 	buffer.resize(size);
 
-	for(unsigned int i = 0; i < buffer.size; i++)
+	for (unsigned int i = 0; i < size; i++)
 	{
 		stream >> buffer.array[i];
 	}
@@ -175,25 +181,27 @@ BufferStream &operator >>(BufferStream &stream, Buffer &buffer)
 	return stream;
 }
 
-char& Buffer::operator[](const unsigned int &index)
+char& Buffer::operator[](const unsigned int& index)
 {
 	return array[index];
 }
 
-Buffer::operator const char *()
+Buffer::operator const char* ()
 {
 	return array;
 }
 
-BufferStream::BufferStream(Buffer *buffer, const BufferStream::TypeStream &typeStream)
+BufferStream::BufferStream(Buffer * buffer, const BufferStream::TypeStream & typeStream)
 	: m_readIndex(0), m_writeIndex(0)
 {
 	m_buffer = buffer;
 	m_typeStream = typeStream;
 }
 
-BufferStream& BufferStream::writeString(const char* s, const unsigned int& size)
+BufferStream& BufferStream::writeString(const char* s)
 {
+	unsigned int size = 0;
+	while(s[size++]);
 	*this << size;
 	for (unsigned int i = 0; i < size; i++)
 		* this << s[i];
@@ -212,6 +220,56 @@ BufferStream& BufferStream::readString(char*& s)
 		s[i] = c;
 	}
 	s[size] = 0;
+	return *this;
+}
+
+BufferStream &BufferStream::writeData(const unsigned char *s, const unsigned int &size)
+{
+	unsigned int t_size = size;
+	*this << t_size;
+	m_buffer->resize(m_buffer->size + size);
+	for (unsigned int i = 0; i < size; i++)
+	{
+		char c = s[i];
+		(*m_buffer)[m_writeIndex++] = static_cast<char>(c);
+	}
+	return *this;
+}
+
+BufferStream& BufferStream::writeData(const char* s, const unsigned int& size)
+{
+	unsigned int t_size = size;
+	*this << t_size;
+	m_buffer->resize(m_buffer->size + size);
+	for (unsigned int i = 0; i < size; i++)
+	{
+		char c = s[i];
+		(*m_buffer)[m_writeIndex++] = c;
+	}
+	return *this;
+}
+
+BufferStream &BufferStream::readData(unsigned char *&s, unsigned int &size)
+{
+	*this >> size;
+	s = new unsigned char[size];
+	for (unsigned int i = 0; i < size; i++)
+	{
+		char c = (*m_buffer)[m_readIndex++];
+		s[i] = c;
+	}
+	return *this;
+}
+
+BufferStream& BufferStream::readData(char*& s, unsigned int& size)
+{
+	*this >> size;
+	s = new char[size];
+	for (unsigned int i = 0; i < size; i++)
+	{
+		unsigned char c = (*m_buffer)[m_readIndex++];
+		s[i] = c;
+	}
 	return *this;
 }
 
@@ -276,8 +334,9 @@ BufferStream& BufferStream::operator <<(const long long& n)
 #ifdef USE_STL
 BufferStream& BufferStream::operator<<(const std::string & s)
 {
-	*this << static_cast<unsigned int>(s.size());
-	for (unsigned int i = 0; i < s.size(); i++)
+	unsigned int size = static_cast<unsigned int>(s.size());
+	*this << size;
+	for (unsigned int i = 0; i < size; i++)
 	{
 		*this << s[i];
 	}

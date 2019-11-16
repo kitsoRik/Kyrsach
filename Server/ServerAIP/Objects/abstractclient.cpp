@@ -16,7 +16,7 @@ void AbstractClient::confirmConnect2Controler()
 {
 	Command command(Command::ConfirmConnect2Controler);
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.array, buffer.fullSize());
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
 void AbstractClient::onConnected()
@@ -32,7 +32,7 @@ void AbstractClient::onDisconnected()
 void AbstractClient::onReadyRead()
 {
 	auto data = m_socket->readAll();
-	Buffer buffer = Buffer::fromUtf8(data, data.size());
+	Buffer buffer = Buffer::fromBytes(data);
 	Commands commands = Commands::fromBuffer(buffer);
 	for(unsigned int i = 0; i < commands.commands.size(); i++)
 		emit readyCommand(commands.commands.at(i));
