@@ -26,7 +26,10 @@ SOURCES += \
         Data/qtroom.cpp \
         Data/qtrooms.cpp \
         Data/room.cpp \
+        Data/user.cpp \
         Objects/clientsocket.cpp \
+        Objects/userobject.cpp \
+        Objects/usersobject.cpp \
         Static/message.cpp \
         client.cpp \
         main.cpp
@@ -56,7 +59,10 @@ HEADERS += \
     Data/qtroom.h \
     Data/qtrooms.h \
     Data/room.h \
+    Data/user.h \
     Objects/clientsocket.h \
+    Objects/userobject.h \
+    Objects/usersobject.h \
     Static/message.h \
     client.h
 

@@ -30,7 +30,10 @@ private slots:
 
 	void onConfirmOS(const Command &command, QTcpSocket *socket);
 
-	void onConnect2Controler(const QString &key, const QString &password, AbstractClient *client);
+	void onConnect2Controler(const QString &key,
+							 const QString &login,
+							 const QString &password,
+							 AbstractClient *client);
 
 private:
 	QTcpServer *m_server;

@@ -1,7 +1,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include "Data/buffer.h"
+#include "buffer.h"
 #include <string>
 
 class Commands;
@@ -16,7 +16,8 @@ public:
 		Control,
 		Connect2Controler,
 		ConfirmConnect2Controler,
-		ConfirmConnection
+		ConfirmConnection,
+		Settings
 	};
 
 	enum OS
@@ -38,10 +39,20 @@ public:
 		TriggeredItem
 	};
 
+	enum SettingsAction
+	{
+		UnknownSettingsAction = -1,
+		AddUser,
+		UnknownUser,
+		ChangeUserPassword,
+		UsersInfo
+	};
+
 	Command();
 	Command(const Title& title, const Buffer &buffer = "");
 	Command(const Title& title, const OS& os, const Buffer &buffer = "");
 	Command(const Title& title, const ControlAction& controlAction, const Buffer &buffer = "");
+	Command(const Title& title, const SettingsAction& settingsAction, const Buffer &buffer = "");
 
 
 
@@ -53,6 +64,9 @@ public:
 
 	ControlAction controlAction() const;
 	void setControlAction(const ControlAction &controlAction);
+
+	SettingsAction settingsAction() const;
+	void setSettingsAction(const SettingsAction &settingsAction);
 
 	Buffer buffer() const;
 	void setBuffer(const Buffer &buffer);
@@ -67,6 +81,7 @@ private:
 	Title m_title;
 	OS m_os;
 	ControlAction m_controlAction;
+	SettingsAction m_settingsAction;
 
 	Buffer m_buffer;
 };

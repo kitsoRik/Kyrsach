@@ -21,6 +21,7 @@ HEADERS += \
     Data/command.h \
     Data/item.h \
     Data/room.h \
+    Data/user.h \
     Objects/Clients/clientslist.h \
     Objects/Controlers/controlerlist.h \
     Objects/abstractclient.h \
@@ -34,6 +35,7 @@ SOURCES += \
         Data/command.cpp \
         Data/item.cpp \
         Data/room.cpp \
+        Data/user.cpp \
         Objects/Clients/clientslist.cpp \
         Objects/Controlers/controlerlist.cpp \
         Objects/abstractclient.cpp \

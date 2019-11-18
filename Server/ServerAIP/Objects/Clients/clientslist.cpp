@@ -44,14 +44,15 @@ void ClientsList::onReadyCommand(const Command &command)
 			while(it != v.end())
 				list.append(QString::fromStdString(*it++));
 
-			if(list.size() != 2)
+			if(list.size() != 3)
 			{
 				qDebug() << "ERROR. LIST SIZE =" << list.size();
 				return;
 			}
 			QString key = list[0],
-					password = list[1];
-			emit connect2Controler(key, password, client);
+					login = list[1],
+					password = list[2];
+			emit connect2Controler(key, login, password, client);
 			break;
 		}
 		default: break;

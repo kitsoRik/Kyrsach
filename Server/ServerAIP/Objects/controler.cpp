@@ -3,7 +3,7 @@
 #include <QTimer>
 
 Controler::Controler(QTcpSocket *socket, QObject *parent)
-	: QObject(parent), m_password("PASS"), m_confirmedConnection(true)
+	: QObject(parent), m_confirmedConnection(true)
 {
 	m_socket = socket;
 	if(socket == nullptr)
@@ -16,17 +16,29 @@ Controler::Controler(QTcpSocket *socket, QObject *parent)
 	qDebug() << "CONTROLER CREATED";
 }
 
-void Controler::addClient(AbstractClient *client)
+void Controler::addClient(const CheckConnectionResult &connection, AbstractClient *client)
 {
 	client->setParent(this);
 
 	connect(client, &AbstractClient::readyCommand, this, &Controler::onReadyCommand);
 
-	client->confirmConnect2Controler();
+	client->confirmConnect2Controler(connection == Admin);
 
 	updateRooms(client);
 
 	m_clients.append(client);
+
+	if(connection == Controler::Admin)
+	{
+		client->setIsAdmin(true);
+		client->sendUsersInfoToAdmin(m_users);
+	}
+}
+
+void Controler::addUser(const QString &login, const QString &pass)
+{
+	::User u(login.toStdString(), pass.toStdString());
+	m_users.append(u);
 }
 
 void Controler::onConnected()
@@ -153,6 +165,36 @@ void Controler::onReadyCommand(const Command &command)
 			}
 			break;
 		}
+		case Command::Settings:
+		{
+			switch (command.settingsAction())
+			{
+				case Command::ChangeUserPassword:
+				{
+					std::vector<std::string> dataList = command.buffer().split('|');
+					QString login = QString::fromStdString(dataList[0]);
+					QString newpassword = QString::fromStdString(dataList[1]);
+
+
+					break;
+				}
+				case Command::AddUser:
+				{
+					qDebug() << "ADDUSER";
+					::User u;
+					Buffer buffer = command.buffer();
+					BufferStream stream (&buffer, BufferStream::ReadOnly);
+
+					stream >> u;
+
+					m_users.append(u);
+
+					updateUsers();
+					break;
+				}
+			}
+			break;
+		}
 		default:
 			break;
 	}
@@ -166,6 +208,20 @@ bool Controler::confirmedConnection() const
 void Controler::setConfirmedConnection(bool confirmedConnection)
 {
 	m_confirmedConnection = confirmedConnection;
+}
+
+Controler::CheckConnectionResult
+Controler::checkConnectionData(const QString &login,
+							   const QString &password)
+{
+	if(login == "admin" && password == "admin")
+		return Controler::Admin;
+	for(auto user : m_users)
+	{
+		if(user.login() == login.toStdString() && user.password() == password.toStdString())
+			return Controler::User;
+	}
+	return Controler::Unknown;
 }
 
 void Controler::parseCommand(const Command &command)
@@ -253,14 +309,15 @@ void Controler::triggeredItem(Item item, AbstractClient *client)
 	client->m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
-QString Controler::password() const
+void Controler::updateUsers()
 {
-	return m_password;
-}
-
-void Controler::setPassword(const QString &password)
-{
-	m_password = password;
+	for(auto client : m_clients)
+	{
+		qDebug() << "CLADM" << client->isAdmin();
+		if(!client->isAdmin())
+			continue;
+		client->sendUsersInfoToAdmin(m_users);
+	}
 }
 
 QString Controler::key() const

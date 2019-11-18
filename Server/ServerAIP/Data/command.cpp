@@ -36,6 +36,16 @@ Command::Command(const Command::Title &title,
 	m_buffer = buffer;
 }
 
+Command::Command(const Command::Title &title,
+				 const Command::SettingsAction &settingsAction,
+				 const Buffer &buffer)
+	: Command()
+{
+	m_title = title;
+	m_settingsAction = settingsAction;
+	m_buffer = buffer;
+}
+
 Command::Title Command::title() const
 {
 	return m_title;
@@ -94,11 +104,22 @@ Command Command::fromBuffer(Buffer &buffer)
 	return command;
 }
 
+Command::SettingsAction Command::settingsAction() const
+{
+	return m_settingsAction;
+}
+
+void Command::setSettingsAction(const SettingsAction &settingsAction)
+{
+	m_settingsAction = settingsAction;
+}
+
 BufferStream& operator <<(BufferStream& stream, const Command& command)
 {
 	stream << command.m_title;
 	stream << command.m_os;
 	stream << command.m_controlAction;
+	stream << command.m_settingsAction;
 	stream << command.m_buffer;
 
 	return stream;
@@ -109,6 +130,7 @@ BufferStream& operator >>(BufferStream& stream, Command& command)
 	stream >> *reinterpret_cast<int *>(&command.m_title);
 	stream >> *reinterpret_cast<int *>(&command.m_os);
 	stream >> *reinterpret_cast<int *>(&command.m_controlAction);
+	stream >> *reinterpret_cast<int *>(&command.m_settingsAction);
 	stream >> command.m_buffer;
 
 	return stream;

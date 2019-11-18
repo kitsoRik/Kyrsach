@@ -31,13 +31,15 @@ signals:
 
 public slots:
 	void connectToServer(const QString &host, const quint16 &port);
-	void connectToControler(const QString &key, const QString &password);
+	void connectToControler(const QString &key, const QString &login, const QString &password);
 
 	void addRoom();
 	void addItem(const QList<int> &pins, const QString &type, const QString &roomName);
 	void turnItem(const Item &item);
 	void updateItems();
 	void updateRooms();
+
+	void addUser(const QString &login, const QString &password);
 
 private slots:
 	void onConnected();

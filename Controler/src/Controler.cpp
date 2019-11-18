@@ -113,9 +113,15 @@ bool Controler::checkAvailable()
 
 void Controler::readAvailable()
 {
+    Serial.print("READ: ");
+    Serial.println(m_client->available());
     Buffer buffer;
+    char *s = new char[4];
     for(int i = 0; i < 4; i++)
-        m_client->read();
+        s[i] = m_client->read();
+    int readSize = *reinterpret_cast<int *>(s);
+    Serial.print("READSIZE: ");
+    Serial.println(readSize);
     while (m_client->available())
     {
         buffer.append((char)m_client->read());
@@ -289,7 +295,10 @@ void Controler::parseCommand(const Command &command)
                     {
                             Serial.println("UPDCAM1");
                         ArduinoCameraOV7670Object *cam = static_cast<ArduinoCameraOV7670Object *>(obj);
+                        Serial.println((cam == nullptr));
+                        Serial.println("UPDCAM12");
                         item->dataSize = 9666;
+                        Serial.println("UPDCAM13");
                         cam->oneFrame();
                             Serial.println("UPDCAM2");
                         item->data = new unsigned char[9666];
@@ -302,7 +311,6 @@ void Controler::parseCommand(const Command &command)
                         for(int i = ArduinoCameraOV7670Object::headerSize; i < 9666; i++)
                             item->data[i] = cam->frame()[i-ArduinoCameraOV7670Object::headerSize];
                         Serial.println("UPDCAM4");
-
                         break;
                     }
                     default:
@@ -317,6 +325,7 @@ void Controler::parseCommand(const Command &command)
             {
                 item->dataSize = 0;
                 delete[] item->data;
+                item->data = nullptr;
             }
             break;
         }
@@ -353,19 +362,13 @@ void Controler::parseCommand(const Command &command)
 
 void Controler::updateRooms()
 {
-    Serial.println("START UPD");
     Buffer buffer;
     BufferStream stream(&buffer, BufferStream::WriteOnly);
-    Serial.println("1 UPD");
     stream << *m_rooms;
-    Serial.println("1 UPD");
     Command c(Command::Control, Command::UpdateRooms, buffer);
     Buffer newb = c.toBuffer();
     auto s = newb.toBytes();
     m_client->write(s, newb.fullSize());
-    Serial.println("END UPD");
-
-    Serial.println(newb.fullSize());
 }
 
 void Controler::triggerItem(const Item *item)

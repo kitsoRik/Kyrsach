@@ -139,7 +139,7 @@ Buffer Buffer::fromUtf8(const char* s)
 {
 	unsigned int size = 0;
 	while (s[size++]);
-	return fromUtf8(s, size);
+	return fromUtf8(s, size - 1);
 }
 
 Buffer Buffer::fromUtf8(const char* s, const int size)

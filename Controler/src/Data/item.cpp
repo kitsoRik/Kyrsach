@@ -5,6 +5,13 @@ Item::Item()
 {
 	type = 0;
 	dataSize = 0;
+	data = nullptr;
+}
+
+Item::~Item()
+{
+	if(data != nullptr)
+		delete[] data;
 }
 
 Buffer Item::toBuffer() const

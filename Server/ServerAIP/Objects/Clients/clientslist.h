@@ -11,7 +11,10 @@ public:
 	explicit ClientsList(QObject *parent = nullptr);
 
 signals:
-	void connect2Controler(const QString &key, const QString &password, AbstractClient *client);
+	void connect2Controler(const QString &key,
+						   const QString &login,
+						   const QString &password,
+						   AbstractClient *client);
 
 public slots:
 	void addClient(AbstractClient *client);

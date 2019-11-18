@@ -23,14 +23,24 @@ Rectangle {
             Layout.alignment: Qt.AlignCenter;
             Layout.preferredWidth: parent.width / 3;
             Layout.preferredHeight: 60;
+            placeholderText: "Token...";
             text: "KEYROSTIK"; // FIXIT
+        }
+        TextField {
+            id: loginField;
+            Layout.alignment: Qt.AlignCenter;
+            Layout.preferredWidth: parent.width / 3;
+            Layout.preferredHeight: 60;
+            placeholderText: "Login...";
+            text: "admin"; // FIXIT
         }
         TextField {
             id: passField;
             Layout.alignment: Qt.AlignCenter;
             Layout.preferredWidth: parent.width / 3;
             Layout.preferredHeight: 60;
-            text: "PASS"; // FIXIT
+            placeholderText: "Password...";
+            text: "admin"; // FIXIT
         }
         Button {
             Layout.alignment: Qt.AlignCenter;
@@ -40,7 +50,7 @@ Rectangle {
             text: "Connect";
 
             onClicked: {
-                client.clientSocket.connectToControler(keyField.text, passField.text);
+                client.clientSocket.connectToControler(keyField.text, loginField.text, passField.text);
             }
         }
     }

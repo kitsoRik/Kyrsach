@@ -186,7 +186,7 @@ Rectangle {
                     let arr;
 
                     if(itemTypeBox.currentText == "CAMERA")
-                        arr = [21, 22, 34, 35, 32, 33, 27, 17, 16, 15, 14, 13, 12, 2];
+                        arr = [21,22,34,35,32,33,27,17,16,15,14,13,12,2];
 //                    arr = [textFieldSIOD.text,
 //                               textFieldSIOC.text,
 //                               textFieldVSYNC.text,

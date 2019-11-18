@@ -25,6 +25,8 @@ int main(int argc, char *argv[])
 	qmlRegisterType<QtRoom>("RostikObjects", 1, 0, "QtRoom");
 	qmlRegisterType<ItemAction>("RostikObjects", 1, 0, "ItemAction");
 	qmlRegisterType<ItemActions>("RostikObjects", 1, 0, "ItemActions");
+	qmlRegisterType<UserObject>("RostikObjects", 1, 0, "UserObject");
+	qmlRegisterType<UsersObject>("RostikObjects", 1, 0, "UsersObject");
 
 	Client *client = new Client();
 

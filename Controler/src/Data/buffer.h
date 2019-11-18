@@ -7,14 +7,15 @@
 #include <string>
 #include <vector>
 #endif
+#include <Arduino.h>
 
 class BufferStream;
 
 class Buffer
 {
 public:
-	unsigned int size;
-	char* array;
+	unsigned int size {0};
+	char* array {nullptr};
 
 	Buffer();
 	Buffer(const Buffer &buffer);
@@ -22,6 +23,7 @@ public:
 	Buffer(const char* s);
 	Buffer(const std::string& str);
 	Buffer(const char* s, const unsigned int& size);
+	~Buffer() { if(array != nullptr) delete[] array;}
 
 	void append(const char& c);
 	void append(const char* c, const unsigned int& size);
@@ -43,7 +45,8 @@ public:
 	friend BufferStream& operator >>(BufferStream& stream, Buffer& buffer);
 
 	char& operator[](const unsigned int& index);
-	operator const char* ();
+
+	Buffer& operator=(const Buffer &buffer);
 };
 
 class BufferStream

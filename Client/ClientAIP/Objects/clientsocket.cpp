@@ -3,6 +3,7 @@
 #include "Data/buffer.h"
 #include "Data/item.h"
 #include "client.h"
+#include "Data/user.h"
 #if defined(Q_OS_ANDROID)
 #include <QtAndroidExtras>
 #endif
@@ -31,12 +32,13 @@ void ClientSocket::connectToServer(const QString &host, const quint16 &port)
 	m_socket->connectToHost(host, port);
 }
 
-void ClientSocket::connectToControler(const QString &key, const QString &password)
+void ClientSocket::connectToControler(const QString &key, const QString &login, const QString &password)
 {
 	m_key = key;
+	Client::instance()->setLogin(login);
 	keyChanged();
 
-	Command command(Command::Connect2Controler, (key + '|' + password).toStdString());
+	Command command(Command::Connect2Controler, (key + '|' + login + '|' + password).toStdString());
 
 	Buffer buffer = command.toBuffer();
 	m_socket->write(buffer.toBytes(), buffer.fullSize());
@@ -97,6 +99,17 @@ void ClientSocket::updateRooms()
 {
 	Command command(Command::Control, Command::UpdateRooms);
 	Buffer buffer = command.toBuffer();
+	m_socket->write(buffer.toBytes(), buffer.fullSize());
+}
+
+void ClientSocket::addUser(const QString &login, const QString &password)
+{
+	User u(login.toStdString(), password.toStdString());
+	Buffer buffer;
+	BufferStream stream (&buffer, BufferStream::WriteOnly);
+	stream << u;
+	Command command(Command::Settings, Command::AddUser, buffer);
+	buffer = command.toBuffer();
 	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
@@ -173,6 +186,9 @@ void ClientSocket::onReadyReadProccess(QByteArray data)
 		{
 			case Command::ConfirmConnect2Controler:
 			{
+				QString adminStr = QString::fromStdString(c.buffer().split(' ')[0]);
+				qDebug() << adminStr;
+				Client::instance()->setIsAdmin(adminStr == "ADMIN");
 				m_connectedToControler = true;
 				emit connectedToControlerChanged();
 				break;
@@ -204,6 +220,33 @@ void ClientSocket::onReadyReadProccess(QByteArray data)
 					}
 					default:
 						break;
+				}
+				break;
+			}
+			case Command::Settings:
+			{
+				switch (c.settingsAction())
+				{
+					case Command::UsersInfo:
+					{
+						Buffer buffer = c.buffer();
+						BufferStream stream (&buffer, BufferStream::ReadOnly);
+
+						int size;
+						stream >> size;
+
+						QList<User> users;
+						for(int i = 0; i < size; i++)
+						{
+							User u;
+							stream >> u;
+							users.append(u);
+						}
+
+						Client::instance()->usersObject()->setUsers(users);
+
+						break;
+					}
 				}
 				break;
 			}

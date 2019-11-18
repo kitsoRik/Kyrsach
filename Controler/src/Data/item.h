@@ -29,6 +29,7 @@ public:
 	int dataSize;
 
 	Item();
+	~Item();
 
 
 	Buffer toBuffer() const;

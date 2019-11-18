@@ -14,24 +14,19 @@ int QtItems::itemsSize() const
 
 void QtItems::setItems(const Items &items)
 {
-	QList<QtItem *> its;
-	if(m_items.size() == items.m_items.size())
+	while(m_items.size() < items.m_items.size())
+		m_items.append(new QtItem(this));
+	while(m_items.size() > items.m_items.size())
 	{
-		int i = 0;
-		for(auto item : items.m_items)
-		{
-			m_items[i++]->setItem(*item);
-		}
-		return;
+		auto item = m_items.last();
+		m_items.pop_back();
+		item->deleteLater();
 	}
-	qDeleteAll(m_items);
-	m_items.clear();
-
+	int i = 0;
 	for(auto item : items.m_items)
 	{
-		QtItem *qtItem = new QtItem(this);
+		QtItem *qtItem = m_items.at(i++);
 		qtItem->setItem(*item);
-		m_items.append(qtItem);
 	}
 
 	emit itemsSizeChanged();

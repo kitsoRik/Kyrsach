@@ -155,6 +155,9 @@ void QtItem::turnCamera()
 	Client *client = Client::instance();
 	Item item = m_item;
 
+	item.dataSize = 0;
+	delete item.data;
+
 	item.on = true;
 	item.type = Item::Camera;
 

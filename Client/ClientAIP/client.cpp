@@ -2,12 +2,13 @@
 
 Client* Client::m_instance = nullptr;
 
-Client::Client(QObject *parent) : QObject(parent)
+Client::Client(QObject *parent) : QObject(parent), m_isAdmin(true)
 {
 	m_instance = this;
 	m_clientSocket = new ClientSocket(this);
 
 	m_rooms = new QtRooms(this);
+	m_usersObject = new UsersObject(this);
 }
 
 Command::OS Client::currentOS()
@@ -37,6 +38,34 @@ void Client::setRooms(const Rooms &rooms)
 {
 	m_rooms->setRooms(rooms);
 }
+
+UsersObject *Client::usersObject() const
+{
+	return m_usersObject;
+}
+
+bool Client::isAdmin() const
+{
+	return m_isAdmin;
+}
+
+void Client::setIsAdmin(bool isAdmin)
+{
+	m_isAdmin = isAdmin;
+	emit isAdminChanged();
+}
+
+QString Client::login() const
+{
+	return m_login;
+}
+
+void Client::setLogin(const QString &login)
+{
+	m_login = login;
+	emit loginChanged();
+}
+
 Client *Client::instance()
 {
 	return m_instance;

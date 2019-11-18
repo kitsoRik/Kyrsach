@@ -77,7 +77,10 @@ void Server::onConfirmOS(const Command &command, QTcpSocket *socket)
 	}
 }
 
-void Server::onConnect2Controler(const QString &key, const QString &password, AbstractClient *client)
+void Server::onConnect2Controler(const QString &key,
+								 const QString &login,
+								 const QString &password,
+								 AbstractClient *client)
 {
 	Controler *controler = m_controlers.fromKey(key);
 	if(!controler)
@@ -85,11 +88,13 @@ void Server::onConnect2Controler(const QString &key, const QString &password, Ab
 		qDebug() << "NULLABLE CLIENT CONTROLER";
 		return;
 	}
-	if(controler->password() != password)
+	auto checkConType = controler->checkConnectionData(login, password);
+	if(checkConType == Controler::CheckConnectionResult::Unknown)
 	{
-		qDebug() << "INCORRECT PASSWORD";
+		qDebug() << "INCORRECT DATA";
 		return;
 	}
 	m_waitClients.remove(client);
-	controler->addClient(client);
+	controler->addClient(checkConType, client);
+
 }

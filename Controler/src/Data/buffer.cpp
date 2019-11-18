@@ -2,13 +2,17 @@
 
 Buffer::Buffer() : size(0), array(nullptr)
 {
-
+	Serial.println("COS");
 }
 
 Buffer::Buffer(const Buffer &buffer)
 {
+	Serial.println("COSCPY");
 	size = buffer.size;
-	this->array = new char[size];
+	if(size != 0)
+		this->array = new char[size];
+	else
+		this->array = nullptr;
 	for (int i = 0; i < size; i++)
 		this->array[i] = buffer.array[i];
 
@@ -16,16 +20,19 @@ Buffer::Buffer(const Buffer &buffer)
 
 Buffer::Buffer(char* s)
 {
+	Serial.println("COSCHAR");
 	*this = fromUtf8(static_cast<const char*>(s));
 }
 
 Buffer::Buffer(const char* s)
 {
+	Serial.println("COSCONSTCHAR");
 	*this = fromUtf8(s);
 }
 
 Buffer::Buffer(const std::string& str)
 {
+	Serial.println("COSCONSTSTR");
 	*this = fromUtf8(str);
 }
 
@@ -49,7 +56,7 @@ void Buffer::resize(const unsigned int& size)
 {
 	if (this->size == size)
 		return;
-	char* s = new char[size + 1];
+	char* s = new char[size];
 
 	unsigned int i;
 	for (i = 0; i < size && i < this->size; i++)
@@ -58,11 +65,14 @@ void Buffer::resize(const unsigned int& size)
 	}
 	for (; i < size; i++)
 		s[i] = 0;
-	s[size] = 0;
 
 	this->size = size;
 
-	delete array;
+	if(array)
+	{
+		delete array;
+		array = nullptr;
+	}
 	array = s;
 }
 
@@ -139,7 +149,7 @@ Buffer Buffer::fromUtf8(const char* s)
 {
 	unsigned int size = 0;
 	while (s[size++]);
-	return fromUtf8(s, size);
+	return fromUtf8(s, size-1);
 }
 
 Buffer Buffer::fromUtf8(const char* s, const int size)
@@ -186,9 +196,20 @@ char& Buffer::operator[](const unsigned int& index)
 	return array[index];
 }
 
-Buffer::operator const char* ()
+Buffer& Buffer::operator=(const Buffer &buffer)
 {
-	return array;
+	if(this->array)
+	{
+		Serial.print("SIZE WHEN DEL: ");
+		Serial.println(this->size);
+		delete[] this->array;
+		this->array = nullptr;
+	}
+	this->size = buffer.size;
+	array = new char[size];
+
+	for(int i = 0; i < size; i++)
+		array[i] = buffer.array[i];
 }
 
 BufferStream::BufferStream(Buffer * buffer, const BufferStream::TypeStream & typeStream)

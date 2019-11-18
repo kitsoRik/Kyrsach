@@ -23,7 +23,15 @@ Rectangle {
                     anchors.fill: parent;
                     font.pointSize: 24;
                     color: "black";
-                    text: "KEY: " + client.clientSocket.key;
+                    text: {
+                        let resultText;
+                        if(client.isAdmin)
+                            resultText = "Admin: ";
+                        else
+                            resultText = "User: ";
+                        resultText += client.login;
+                        return resultText;
+                    }
                 }
             }
 
@@ -55,6 +63,7 @@ Rectangle {
             ListView {
                 Layout.fillHeight: true;
                 Layout.fillWidth: true;
+                clip: true;
                 model: client.rooms.roomsSize;
 
                 delegate: Rectangle {
@@ -105,6 +114,68 @@ Rectangle {
                     }
                 }
             }
+
+            Rectangle {
+                visible: client.isAdmin;
+                Layout.fillWidth: true;
+                Layout.preferredHeight: 50;
+
+                Text {
+                    anchors.fill: parent;
+                    font.pointSize: 24;
+                    color: "black";
+                    text: "Users";
+                }
+
+                MouseArea {
+                    anchors.fill: parent;
+
+                    onClicked: {
+                        console.log("CLI");
+                        client.clientSocket.addUser("user", "user");
+                    }
+                }
+            }
+
+            ListView {
+                visible: client.isAdmin;
+                Layout.fillHeight: true;
+                Layout.fillWidth: true;
+                clip: true;
+                model: client.usersObject.usersSize;
+
+                delegate: Rectangle {
+                    property UserObject userObject: client.usersObject.userAt(index);
+                    width: parent.width;
+                    height: 50;
+                    color: "yellow";
+
+                    RowLayout {
+                        anchors.fill: parent;
+                        Text {
+                            Layout.fillHeight: true;
+                            Layout.preferredWidth: 40;
+                            text: parent.parent.userObject.login;
+                            color: "blue";
+                            font.pointSize: 20;
+                        }
+
+                        Item {
+                            Layout.fillHeight: true;
+                            Layout.fillWidth: true;
+                        }
+
+                        Rectangle {
+                            Layout.fillHeight: true;
+                            Layout.preferredWidth: height;
+
+                            color: parent.parent.userObject.online ? "green" : "red";
+                        }
+
+                    }
+                }
+            }
+
         }
     }
 
@@ -119,6 +190,8 @@ Rectangle {
             visible: globalQtRoom != null;
 
             Text {
+                Layout.fillHeight: true;
+                Layout.preferredWidth: 40;
                 anchors.fill: parent;
                 text: globalQtRoom.name;
             }
