@@ -39,6 +39,7 @@ signals:
 	void disconnected();
 
 public slots:
+	void changeSocket(QTcpSocket *socket);
 	void parseCommand(const Command &command);
 
 	void updateItems(AbstractClient *client);

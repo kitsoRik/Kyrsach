@@ -4,12 +4,15 @@
 #include "Objects/clientsocket.h"
 #include "Data/qtrooms.h"
 #include "Objects/usersobject.h"
+#include "Objects/blueboothsocket.h"
+#include "Objects/controlersocket.h"
 
 class Client : public QObject
 {
 	Q_OBJECT
 
 	Q_PROPERTY(ClientSocket* clientSocket READ clientSocket CONSTANT)
+	Q_PROPERTY(ControlerSocket* controlerSocket READ controlerSocket CONSTANT)
 	Q_PROPERTY(QtRooms* rooms READ rooms NOTIFY roomsChanged)
 	Q_PROPERTY(bool isAdmin READ isAdmin NOTIFY isAdminChanged)
 	Q_PROPERTY(QString login READ login NOTIFY loginChanged)
@@ -21,7 +24,9 @@ public:
 	static Client *instance();
 
 	static Command::OS currentOS();
+
 	ClientSocket *clientSocket() const;
+	ControlerSocket *controlerSocket() const;
 
 	QtRooms *rooms() const;
 	void setRooms(const Rooms &rooms);
@@ -45,6 +50,8 @@ private:
 	bool m_isAdmin;
 	QString m_login;
 	ClientSocket *m_clientSocket;
+	BlueboothSocket *m_bluetoothSocket;
+	ControlerSocket *m_controlerSocket;
 
 	QtRooms *m_rooms;
 	UsersObject *m_usersObject;

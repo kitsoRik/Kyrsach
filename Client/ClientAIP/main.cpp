@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 #endif
 
 	qmlRegisterType<ClientSocket>("RostikObjects", 1, 0, "ClientSocket");
+	qmlRegisterType<ControlerSocket>("RostikObjects", 1, 0, "ControlerSocket");
 	qmlRegisterType<QtItems>("RostikObjects", 1, 0, "QtItems");
 	qmlRegisterType<QtItem>("RostikObjects", 1, 0, "QtItem");
 	qmlRegisterType<QtRooms>("RostikObjects", 1, 0, "QtRooms");

@@ -23,12 +23,11 @@ ClientSocket::ClientSocket(QObject *parent)
 	connect(m_socket, &QTcpSocket::connected, this, &ClientSocket::onConnected);
 	connect(m_socket, &QTcpSocket::disconnected, this, &ClientSocket::onDisconnected);
 	connect(m_socket, &QTcpSocket::readyRead, this, &ClientSocket::onReadyRead);
-
-	connectToServer(HOST, PORT);
 }
 
 void ClientSocket::connectToServer(const QString &host, const quint16 &port)
 {
+	m_socket->disconnectFromHost();
 	m_socket->connectToHost(host, port);
 }
 

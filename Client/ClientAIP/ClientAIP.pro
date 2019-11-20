@@ -1,6 +1,6 @@
 QT += quick network gui
-android: QT += androidextras widgets
-windows: QT += widgets
+android: QT += androidextras widgets bluetooth
+windows: QT += widgets bluetooth
 
 CONFIG += c++11
 
@@ -27,7 +27,9 @@ SOURCES += \
         Data/qtrooms.cpp \
         Data/room.cpp \
         Data/user.cpp \
+        Objects/blueboothsocket.cpp \
         Objects/clientsocket.cpp \
+        Objects/controlersocket.cpp \
         Objects/userobject.cpp \
         Objects/usersobject.cpp \
         Static/message.cpp \
@@ -60,7 +62,9 @@ HEADERS += \
     Data/qtrooms.h \
     Data/room.h \
     Data/user.h \
+    Objects/blueboothsocket.h \
     Objects/clientsocket.h \
+    Objects/controlersocket.h \
     Objects/userobject.h \
     Objects/usersobject.h \
     Static/message.h \

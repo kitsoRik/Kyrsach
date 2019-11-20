@@ -50,18 +50,18 @@ void Server::onConfirmOS(const Command &command, QTcpSocket *socket)
 		case Command::OS::Controler:
 		{
 			QString key = command.buffer().array;
-
-			if(m_controlers.fromKey(key))
+			Controler *controler = m_controlers.fromKey(key);
+			if(controler)
 			{
-				qDebug() << "DUPLICATED KEY:" << key;
-				return;
+				qDebug() << "C";
+				controler->changeSocket(socket);
+			}else
+			{
+				controler = new Controler(socket, this);
+				controler->setKey(key);
+
+				m_controlers.addControler(controler);
 			}
-
-			auto *controler = new Controler(socket, this);
-
-			controler->setKey(key);
-
-			m_controlers.addControler(controler);
 			break;
 		}
 		case Command::OS::Android:

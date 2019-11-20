@@ -6,6 +6,8 @@ Client::Client(QObject *parent) : QObject(parent), m_isAdmin(true)
 {
 	m_instance = this;
 	m_clientSocket = new ClientSocket(this);
+	m_bluetoothSocket = new BlueboothSocket(this);
+	m_controlerSocket = new ControlerSocket(this);
 
 	m_rooms = new QtRooms(this);
 	m_usersObject = new UsersObject(this);
@@ -64,6 +66,11 @@ void Client::setLogin(const QString &login)
 {
 	m_login = login;
 	emit loginChanged();
+}
+
+ControlerSocket *Client::controlerSocket() const
+{
+	return m_controlerSocket;
 }
 
 Client *Client::instance()

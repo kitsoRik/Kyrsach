@@ -81,9 +81,24 @@ bool Controler::connectToHost(const int &wait)
     return m_client->connected();
 }
 
+void Controler::reconnectToWiFi(const char *ssid, 
+                                const char *password)
+{
+    Serial.print("CHANGED SSID AND PASSWORD: ");
+    Serial.print(ssid);
+    Serial.println(password);
+    
+    m_ssid = ssid;
+    m_password = password;
+
+    WiFi.disconnect();
+    checkConnect();
+}
+
 void Controler::update()
 {
-    checkConnect();
+    if(!checkConnect())
+        return;
     if (checkAvailable())
     {
         readAvailable();
@@ -91,19 +106,17 @@ void Controler::update()
     monitorChanges();
 }
 
-void Controler::checkConnect()
+bool Controler::checkConnect()
 {
-    while (!m_client->connected() || !WiFi.isConnected())
+    if (!WiFi.isConnected())
     {
-        if (!WiFi.isConnected())
-        {
-            connectToWifi(5000);
-        }
-        else if (!m_client->connected())
-        {
-            connectToHost(1000);
-        }
+        connectToWifi(1000);
     }
+    else if (!m_client->connected())
+    {
+        connectToHost(1000);
+    }
+    return (WiFi.isConnected() && m_client->connected());
 }
 
 bool Controler::checkAvailable()

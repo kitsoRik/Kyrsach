@@ -224,6 +224,13 @@ Controler::checkConnectionData(const QString &login,
 	return Controler::Unknown;
 }
 
+void Controler::changeSocket(QTcpSocket *socket)
+{
+	m_socket->disconnect();
+	m_socket->deleteLater();
+	m_socket = socket;
+}
+
 void Controler::parseCommand(const Command &command)
 {
 	Command::Title title = command.title();

@@ -15,6 +15,7 @@ Controler *ControlerList::fromKey(const QString &key)
 {
 	for(auto controler : m_controlers)
 	{
+		qDebug() << controler->key();
 		if(controler->key() == key)
 			return controler;
 	}

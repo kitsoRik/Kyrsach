@@ -31,7 +31,9 @@ public:
     bool connectToWifi(const int &wait = 30000);
     bool connectToHost(const int &wait = 30000);
 
-    void checkConnect();
+    void reconnectToWiFi(const char *ssid, const char *password);
+
+    bool checkConnect();
     bool checkAvailable();
     void readAvailable();
     void monitorChanges();
