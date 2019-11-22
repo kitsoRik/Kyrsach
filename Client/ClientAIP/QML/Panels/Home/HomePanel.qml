@@ -41,6 +41,8 @@ Rectangle {
                 anchors.margins: 20;
                 hoverEnabled: true;
 
+                visible: client.isAdmin;
+
                 background: Rectangle {
                     anchors.fill: parent;
                     radius: 5;
@@ -120,19 +122,26 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
 
-                Text {
-                    anchors.fill: parent;
-                    font.pointSize: 24;
-                    color: "black";
-                    text: "Users";
-                }
-
-                MouseArea {
+                RowLayout {
                     anchors.fill: parent;
 
-                    onClicked: {
-                        console.log("CLI");
-                        client.clientSocket.addUser("user", "user");
+                    Text {
+                        Layout.fillHeight: true;
+                        Layout.fillWidth: true;
+                        font.pointSize: 24;
+                        color: "black";
+                        text: "Users";
+                    }
+
+                    Button {
+                        Layout.fillHeight: true;
+                        Layout.fillWidth: true;
+                        font.pointSize: 24;
+                        text: "Add user";
+
+                        onClicked: {
+                            addUserPanel.visible = true;
+                        }
                     }
                 }
             }
@@ -294,6 +303,7 @@ Rectangle {
         Button {
             Layout.preferredHeight: 30;
             Layout.fillWidth: true;
+            visible: client.isAdmin;
 
             text: "Add item";
 
@@ -308,6 +318,20 @@ Rectangle {
         visible: false;
 
         anchors.fill: parent;
+    }
+
+    AddUserPanel {
+        id: addUserPanel;
+        visible: false;
+
+        anchors.fill: parent;
+
+        onVisibleChanged: {
+            if(visible)
+                drawer.visible = false;
+            else
+                drawer.visible = true;
+        }
     }
 
     EditItemPanel {

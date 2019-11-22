@@ -203,7 +203,7 @@ Rectangle {
 //                               textFieldD7.text];
                     else
                     arr = [pinField.text];
-                    client.clientSocket.addItem(arr, itemTypeBox.currentText, globalQtRoom.name);
+                    client.clientSocket.addItem(arr, itemTypeBox.currentText, globalQtRoom.identifier);
                     addItemPanel.visible = false;
                 }
             }

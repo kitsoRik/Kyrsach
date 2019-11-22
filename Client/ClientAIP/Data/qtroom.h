@@ -10,6 +10,7 @@ class QtRoom : public QObject
 	Q_OBJECT
 
 	Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+	Q_PROPERTY(QString identifier READ identifier NOTIFY identifierChanged)
 	Q_PROPERTY(QtItems* qtItems READ qtItems CONSTANT)
 public:
 	explicit QtRoom(QObject *parent = nullptr);
@@ -17,12 +18,15 @@ public:
 	void setName(const QString &name);
 	QString name() const;
 
+	QString identifier() const;
+
 	QtItems *qtItems() const;
 
 	void setRoom(const Room &room);
 
 signals:
 	void nameChanged();
+	void identifierChanged();
 
 public slots:
 

@@ -57,11 +57,12 @@ void ClientSocket::addRoom()
 
 void ClientSocket::addItem(const QList<int> &pins, const QString &type, const QString &roomName)
 {
+	qDebug() << "ADD ITEM IN ROOMNAME" << roomName;
 	Item item;
 	item.pins.resize(pins.size());
 	for(int i =0; i < pins.size(); i++)
 		item.pins[i] = pins[i];
-	item.roomName = roomName.toStdString();
+	item.roomIdentifier = roomName.toStdString();
 	qDebug() << pins;
 	qDebug() << item.pins;
 	if(type == "LED")

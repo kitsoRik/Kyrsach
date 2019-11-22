@@ -76,7 +76,7 @@ Room* Rooms::createRoom(const std::string &name)
 
 Room* Rooms::addRoom(const Room &r)
 {
-	Room *room = new Room(r);
+	Room *room = createRoom(r.name);
 	rooms.push_back(room);
 	return room;
 }

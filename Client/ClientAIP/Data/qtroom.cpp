@@ -18,6 +18,11 @@ QString QtRoom::name() const
 	return m_name;
 }
 
+QString QtRoom::identifier() const
+{
+	return QString::fromStdString(m_room.identifier);
+}
+
 QtItems *QtRoom::qtItems() const
 {
 	return m_qtItems;
@@ -25,6 +30,7 @@ QtItems *QtRoom::qtItems() const
 
 void QtRoom::setRoom(const Room &room)
 {
+	qDebug() << "SET ROOM" << QString::fromStdString(room.identifier);
 	m_room = room;
 	nameChanged();
 	if(!m_firstName)
@@ -33,6 +39,8 @@ void QtRoom::setRoom(const Room &room)
 		emit nameChanged();
 		m_firstName = true;
 	}
+
+	emit identifierChanged();
 
 	m_qtItems->setItems(room.items);
 }

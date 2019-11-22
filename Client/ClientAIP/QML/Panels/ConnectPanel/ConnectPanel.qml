@@ -30,7 +30,6 @@ Rectangle {
 
             onClicked: {
                 client.clientSocket.connectToServer("192.168.0.106", 3000);
-                connectInternerPanel.visible = true;
                 startConnectPanel.visible = false;
             }
         }
@@ -84,7 +83,7 @@ Rectangle {
 
     ColumnLayout {
         id: connectInternerPanel;
-        visible: false;
+        visible: client.clientSocket.connectedToServer;
         anchors.centerIn: parent;
         width: parent.width;
         height: 180;

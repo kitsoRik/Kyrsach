@@ -335,6 +335,7 @@ QString Controler::key() const
 void Controler::setKey(const QString &key)
 {
 	m_key = key;
+	qDebug() << "KEY:" << key;
 }
 
 QList<AbstractClient *> Controler::clients() const
