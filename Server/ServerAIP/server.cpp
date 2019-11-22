@@ -11,7 +11,7 @@ Server::Server(QObject *parent) : QObject(parent)
 
 	connect(m_server, &QTcpServer::newConnection, this, &Server::onNewConnection);
 
-	if(!m_server->listen(QHostAddress("192.168.0.106"), PORT))
+	if(!m_server->listen(QHostAddress::Any, PORT))
 	{
 		qDebug() << "Error listen server: " <<  m_server->errorString();
 		qApp->quit();
@@ -49,7 +49,7 @@ void Server::onConfirmOS(const Command &command, QTcpSocket *socket)
 	{
 		case Command::OS::Controler:
 		{
-			QString key = command.buffer().array;
+			QString key = QString::fromUtf8(command.buffer().array, command.buffer().size);
 			Controler *controler = m_controlers.fromKey(key);
 			if(controler)
 			{

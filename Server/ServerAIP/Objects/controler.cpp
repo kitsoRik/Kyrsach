@@ -256,8 +256,11 @@ void Controler::parseCommand(const Command &command)
 				}
 				case Command::UpdateRooms:
 				{
+
 					Buffer buffer = command.buffer();
 					m_rooms = Rooms::fromBuffer(buffer);
+					qDebug() << "ROOMSNEW";
+					qDebug() << m_rooms.rooms.size();
 					for(auto client : m_clients)
 					{
 						updateRooms(client);
@@ -320,7 +323,6 @@ void Controler::updateUsers()
 {
 	for(auto client : m_clients)
 	{
-		qDebug() << "CLADM" << client->isAdmin();
 		if(!client->isAdmin())
 			continue;
 		client->sendUsersInfoToAdmin(m_users);

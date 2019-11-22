@@ -8,8 +8,6 @@ ControlerSocket::ControlerSocket(QObject *parent) : QObject(parent)
 	{
 		qDebug() << "CONNECTED";
 		emit connectedChanged();
-
-		QTimer::singleShot(1000, [this](){m_socket->write("123|123");});
 	});
 
 
@@ -20,7 +18,10 @@ ControlerSocket::ControlerSocket(QObject *parent) : QObject(parent)
 	});
 	connect(m_socket, &QTcpSocket::readyRead, [this]()
 	{
-		qDebug() << m_socket->readAll();
+		auto data = m_socket->readAll();
+		qDebug() << data;
+		if(data == "OK")
+			m_socket->disconnectFromHost();
 	});
 }
 

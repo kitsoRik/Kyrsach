@@ -13,7 +13,7 @@ QtItem::QtItem(QtItems *items) : QObject(items), m_firstName(false)
 
 void QtItem::setItem(const Item &item)
 {
-	QFile file("Q:/123.txt");
+	/* QFile file("Q:/123.txt");
 	file.open(QIODevice::ReadWrite);
 	file.resize(0);
 
@@ -25,7 +25,7 @@ void QtItem::setItem(const Item &item)
 	file.close();
 
 	QImage img = QImage::fromData(item.data, item.dataSize);
-	setImage(img);
+	setImage(img); */
 	bool changed = m_item.on != item.on;
 	m_item = item;
 
@@ -33,6 +33,12 @@ void QtItem::setItem(const Item &item)
 	emit typeChanged();
 	emit angleChanged();
 	emit onChanged();
+
+	if(m_item.type == Item::Camera)
+	{
+		QImage img = QImage::fromData(item.data, item.dataSize);
+		setImage(img);
+	}
 
 	if(!m_firstName)
 	{

@@ -58,7 +58,7 @@ Rectangle {
                 text: "Add room";
 
                 onClicked: {
-                    client.clientSocket.addRoom();
+                    addRoomPanel.visible = true;
                 }
             }
 
@@ -311,6 +311,13 @@ Rectangle {
                 addItemPanel.visible = true;
             }
         }
+    }
+
+    AddRoomPanel {
+        id: addRoomPanel;
+        visible: false;
+
+        anchors.fill: parent;
     }
 
     AddItemPanel {

@@ -2,12 +2,11 @@
 
 Buffer::Buffer() : size(0), array(nullptr)
 {
-	Serial.println("COS");
+	
 }
 
 Buffer::Buffer(const Buffer &buffer)
 {
-	Serial.println("COSCPY");
 	size = buffer.size;
 	if(size != 0)
 		this->array = new char[size];
@@ -20,19 +19,16 @@ Buffer::Buffer(const Buffer &buffer)
 
 Buffer::Buffer(char* s)
 {
-	Serial.println("COSCHAR");
 	*this = fromUtf8(static_cast<const char*>(s));
 }
 
 Buffer::Buffer(const char* s)
 {
-	Serial.println("COSCONSTCHAR");
 	*this = fromUtf8(s);
 }
 
 Buffer::Buffer(const std::string& str)
 {
-	Serial.println("COSCONSTSTR");
 	*this = fromUtf8(str);
 }
 

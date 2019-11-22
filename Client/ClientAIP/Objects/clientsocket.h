@@ -5,6 +5,13 @@
 #include <QTcpSocket>
 #include "Data/command.h"
 
+#if defined(Q_OS_WIN)
+const QString HOST = "31.131.28.232";
+#elif defined(Q_OS_ANDROID)
+const QString HOST = "31.131.28.232";
+#endif
+const quint16 PORT = 3000;
+
 class Item;
 
 class ClientSocket : public QObject
@@ -30,10 +37,10 @@ signals:
 	void keyChanged();
 
 public slots:
-	void connectToServer(const QString &host, const quint16 &port);
+	void connectToServer(const QString &host = HOST, const quint16 &port = PORT);
 	void connectToControler(const QString &key, const QString &login, const QString &password);
 
-	void addRoom();
+	void addRoom(const QString &name);
 	void addItem(const QList<int> &pins, const QString &type, const QString &roomName);
 	void turnItem(const Item &item);
 	void updateItems();

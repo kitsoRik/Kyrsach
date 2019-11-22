@@ -8,12 +8,6 @@
 #include <QtAndroidExtras>
 #endif
 
-#if defined(Q_OS_WIN)
-const QString HOST = "192.168.0.106";
-#elif defined(Q_OS_ANDROID)
-const QString HOST = "192.168.0.106";
-#endif
-const int PORT = 3000;
 
 ClientSocket::ClientSocket(QObject *parent)
 	: QObject(parent), m_connectedToServer(false), m_connectedToControler(false)
@@ -43,12 +37,10 @@ void ClientSocket::connectToControler(const QString &key, const QString &login, 
 	m_socket->write(buffer.toBytes(), buffer.fullSize());
 }
 
-void ClientSocket::addRoom()
+void ClientSocket::addRoom(const QString &name)
 {
-	static int n = 0;
 	Room room;
-	room.name = ("Room " + QString::number(n++)).toStdString();
-
+	room.name = name.toStdString();
 
 	Command command(Command::Control, Command::AddRoom, room.toBuffer());
 	Buffer buffer = command.toBuffer();

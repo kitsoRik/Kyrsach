@@ -15,8 +15,6 @@ Message::Message()
 
 void Message::send()
 {
-	QString title = titleFromType(type);
-	QString text = this->text.replace("%pin%", QString::number(this->pin));
 #if defined(Q_OS_WIN)
 	tray.showMessage(title, text);
 #elif defined(Q_OS_ANDROID)
@@ -25,27 +23,11 @@ void Message::send()
 #endif
 }
 
-void Message::sendChanged(const int &pin)
-{
-	Message message;
-	message.pin = pin;
-	message.type = Changed;
-	message.text = "Pin %pin% changed";
-	message.send();
-}
-
 void Message::sendMessage(const QString &title, const QString &text)
 {
 	Message message;
-	message.type = Changed;
+	message.title = title;
 	message.text = text;
 	message.send();
 }
 
-QString Message::titleFromType(const Message::MsgType msgType)
-{
-	switch (msgType)
-	{
-		case Changed: return "Changed";
-	}
-}

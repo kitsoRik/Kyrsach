@@ -4,17 +4,30 @@ std::vector<std::string> split(const std::string &str, const char sep);
 
 Controler *Controler::m_instance = nullptr;
 
-Controler::Controler(const char *ssid, const char *password, const char* host) 
+Controler::Controler(const char* host) 
     : m_key("KEYROSTIK"),
-      m_ssid(ssid),
-      m_password(password),
       m_host(host),
       m_port(3000)
 {
+    int t = writeString("AndroidAP4BB3", 0);
+    writeString("ctji4432", t);
+    EEPROM.commit();
+    int ssidlength = readString(0, m_ssid);
+    int passLength = readString(ssidlength, m_password);
+
+    Serial.print("Start SSID: ");
+    Serial.println(m_ssid);
+    Serial.print("Start Password: ");
+    Serial.println(m_password);
+
     m_instance = this;
 
     m_client = new WiFiClient();
     m_rooms = new Rooms;
+
+    m_apServer = new WiFiServer();
+
+    m_apServer->begin(3000);
 
     if (connectToWifi(1000))
     {
@@ -26,16 +39,7 @@ Controler::Controler(const char *ssid, const char *password, const char* host)
 bool Controler::connectToWifi(const int &wait)
 {
     ulong timer = millis();
-    WiFi.begin(m_ssid, m_password);
 
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print('.');
-        delay(50);
-        if (wait == -1) continue;
-        if (timer + wait < millis())  break;
-    }
-    Serial.println("");
     if (WiFi.isConnected())
     {
         Serial.println("Connected to ");
@@ -43,7 +47,9 @@ bool Controler::connectToWifi(const int &wait)
     }
     else
     {
-        Serial.println("Error connected WiFi.");
+        WiFi.begin(m_ssid, m_password);
+        //Serial.println("Error connected WiFi.");
+        delay(1000);
     }
 
     return WiFi.isConnected();
@@ -66,7 +72,7 @@ bool Controler::connectToHost(const int &wait)
     if (m_client->connected())
     {
         Serial.print("Connected to ");
-        Serial.print(m_host);
+        Serial.println(m_host);
     }
     else
     {
@@ -81,8 +87,8 @@ bool Controler::connectToHost(const int &wait)
     return m_client->connected();
 }
 
-void Controler::reconnectToWiFi(const char *ssid, 
-                                const char *password)
+void Controler::reconnectToWiFi(char *ssid, 
+                                char *password)
 {
     Serial.print("CHANGED SSID AND PASSWORD: ");
     Serial.print(ssid);
@@ -97,6 +103,7 @@ void Controler::reconnectToWiFi(const char *ssid,
 
 void Controler::update()
 {
+    updateAP();
     if(!checkConnect())
         return;
     if (checkAvailable())
@@ -104,6 +111,31 @@ void Controler::update()
         readAvailable();
     }
     monitorChanges();
+}
+
+void Controler::updateAP()
+{
+     WiFiClient t_client = m_apServer->available();
+     if(t_client)
+     {
+        WiFiClient *client = new WiFiClient(t_client);
+
+        Serial.println("NEW APSERVER CLIENT");
+
+        m_apClients.push_back(client);
+     }
+
+     for(WiFiClient *client : m_apClients)
+     {
+         if(!client)
+            return;
+         if(client->available())
+         {
+             Serial.println(client->readString());
+             client->write("OK");
+             client = nullptr;
+         }
+     }
 }
 
 bool Controler::checkConnect()
@@ -126,14 +158,12 @@ bool Controler::checkAvailable()
 
 void Controler::readAvailable()
 {
-    Serial.print("READ: ");
     Serial.println(m_client->available());
     Buffer buffer;
     char *s = new char[4];
     for(int i = 0; i < 4; i++)
         s[i] = m_client->read();
     int readSize = *reinterpret_cast<int *>(s);
-    Serial.print("READSIZE: ");
     Serial.println(readSize);
     while (m_client->available())
     {
@@ -197,9 +227,27 @@ void Controler::monitorChanges()
         updateRooms();
 }
 
+bool Controler::checkItemForPassability(Item &checkItem)
+{
+    for(auto room : m_rooms->rooms)
+    {
+        for(Item *item : room->items.m_items)
+        {
+            for(int checkPin : checkItem.pins)
+            {
+                for(int pin : item->pins)
+                {
+                    if(pin == checkPin)
+                        return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 void Controler::parseCommand(const Command &command)
 {
-    Serial.println("PC1");
     switch (command.title())
     {
     case Command::Control:
@@ -219,6 +267,18 @@ void Controler::parseCommand(const Command &command)
             Item temp_item = Item::fromBuffer(command.buffer());
             Room* room = m_rooms->roomFromIdentifier(temp_item.roomIdentifier);
           
+            if(!checkItemForPassability(temp_item))
+            {
+                Serial.println("Bad item");
+                return;
+            }
+
+            if(!room)
+            {
+                Serial.println("Bad room");
+                return;
+            }
+
             Item *item = room->addItem(temp_item);
             ArduinoObject *object;
             if (item->type == Item::Led)
@@ -270,12 +330,24 @@ void Controler::parseCommand(const Command &command)
         {
             Item temp_item = Item::fromBuffer(command.buffer());
             Room *room = m_rooms->roomFromIdentifier(temp_item.roomIdentifier);
+            
+            if(!room)
+                return;
+
             Item *item = room->items.itemFromIdentifier(temp_item.identifier);
             
+            if(!item)
+                return;
+
             Serial.println(temp_item.type);
             Serial.println(temp_item.pins[0]);
             for (ArduinoObject *obj : m_objects)
             {
+                if(!obj)
+                {
+                    Serial.println("NEOBJ");
+                    continue;
+                }
                 if (obj->identifier() == temp_item.identifier)
                 {
                     Serial.print("CHECK PIN: ");
@@ -396,9 +468,52 @@ void Controler::onConnected()
 {
     Command c(Command::Confirm, Command::Controler, m_key);
     auto ds = c.toBuffer();
+    Serial.print("BUFFSIZE:");
+    Serial.println(c.buffer().size);
     m_client->write(ds.toBytes(), ds.fullSize());
 
     updateRooms();
+}
+
+void readSsidPassword()
+{
+//   uint8_t ssidSize = 0, passSize = 0;
+
+//   ssidSize = EEPROM.read(0);
+//   ssid = new char[ssidSize + 1];
+//   passSize = EEPROM.read(ssidSize + 1);
+//   password = new char[passSize + 1];
+//   for(int i = 0; i < ssidSize; i++)
+//     ssid[i] = EEPROM.read(i+1);
+//   for(int i = 0; i < passSize; i++)
+//     password[i] = EEPROM.read(i + 1 + ssidSize + 1);
+
+//     ssid[ssidSize] = 0;
+//     password[passSize] = 0;
+}
+
+void writeSsidPassword()
+{
+    // uint8_t ssidSize = -1, passSize = -1;
+    // while(ssid[++ssidSize]);
+    // while(password[++passSize]);
+
+    // EEPROM.write(0, ssidSize); // 0
+    // for(int i = 0; i < ssidSize; i++)
+    //     EEPROM.write(i + 1, ssid[i]); // 1,2,3
+    // EEPROM.write(ssidSize + 1, passSize); // 4
+    // for(int i = 0; i < passSize; i++)
+    //     EEPROM.write(i + 1 + ssidSize + 1, password[i]); // 5,6,7
+
+    // Serial.print("WRITE: ");
+    // Serial.println(ssid);
+    // Serial.print("WRITE: ");
+    // Serial.println(password);
+    // Serial.println("WRITEEND");
+
+    // Serial.println(passSize);
+
+    // EEPROM.commit();
 }
 
 std::vector<std::string> split(const std::string &str, const char sep)

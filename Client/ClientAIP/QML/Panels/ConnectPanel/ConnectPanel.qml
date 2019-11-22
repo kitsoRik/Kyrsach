@@ -15,7 +15,7 @@ Rectangle {
 
     ColumnLayout {
         id: startConnectPanel;
-        visible: true;
+        visible: !connectControlerPanel.visible && !connectInternerPanel.visible;
         anchors.centerIn: parent;
         width: parent.width;
         height: 180;
@@ -29,7 +29,7 @@ Rectangle {
             text: "Connect to Server";
 
             onClicked: {
-                client.clientSocket.connectToServer("192.168.0.106", 3000);
+                client.clientSocket.connectToServer();
                 startConnectPanel.visible = false;
             }
         }
@@ -42,7 +42,6 @@ Rectangle {
 
             onClicked: {
                 client.controlerSocket.connectToHost("192.168.4.1", 3000);
-                startConnectPanel.visible = false;
             }
         }
     }
@@ -120,7 +119,6 @@ Rectangle {
             text: "Connect";
 
             onClicked: {
-                console.log("CLICK CONNECT");
                 client.clientSocket.connectToControler(keyField.text, loginField.text, passField.text);
             }
         }

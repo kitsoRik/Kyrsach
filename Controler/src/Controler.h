@@ -2,6 +2,7 @@
 #define CONTROLER_H
 
 #include <WiFi.h>
+#include <EEPROM.h>
 #include <list>
 #include <string>
 #include "Data/command.h"
@@ -19,9 +20,7 @@
 class Controler 
 {
 public:
-    explicit Controler(const char *ssid, 
-                        const char *password,
-                        const char *host);
+    explicit Controler(const char *host);
 
     static Controler *instance() { return m_instance; }
     static void setInstance(Controler *controler) { m_instance = controler; }
@@ -31,13 +30,16 @@ public:
     bool connectToWifi(const int &wait = 30000);
     bool connectToHost(const int &wait = 30000);
 
-    void reconnectToWiFi(const char *ssid, const char *password);
+    void reconnectToWiFi(char *ssid, char *password);
 
+    void updateAP();
     bool checkConnect();
     bool checkAvailable();
     void readAvailable();
     void monitorChanges();
     void parseCommand(const Command& command);
+
+    bool checkItemForPassability(Item &item);
 
     void updateItems();
     void updateRooms();
@@ -45,16 +47,49 @@ public:
 
     void onConnected();
 
+    int writeString(const char *s, int address)
+    {
+    int size = -1;
+    while(s[++size]);
+    EEPROM.write(address, size);
+    for(int i = 0, j = address + 1; i < size; i++, j++)
+    {
+        EEPROM.write(j, s[i]);
+    }
+    EEPROM.commit();
+
+    int lastAddress = address + size + 2;
+
+    return lastAddress;
+    }
+
+    int readString(int address, char *&s)
+    {
+    int size = EEPROM.read(address);
+    s = new char[size + 1];
+    s[size] = 0;
+    for(int i = 0, j = address + 1; i < size; i++, j++)
+        s[i] = EEPROM.read(j);
+
+    int lastAddress = address + size + 2;
+
+    return lastAddress;
+    }
+
 private:
     const char *m_key;
 
-    const char *m_ssid;
-    const char *m_password;
+    char *m_ssid;
+    char *m_password;
 
     const char *m_host;
     uint16_t m_port;
 
     WiFiClient *m_client;
+    
+
+    WiFiServer *m_apServer;
+    std::list<WiFiClient *> m_apClients;
 
     std::list<ArduinoObject *> m_objects;
 
