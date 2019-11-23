@@ -14,8 +14,8 @@ void ItemAction::trigger()
 {
 	if(!m_receiver)
 	{
-		Message::sendMessage("Title", "Triggered");
-		return;
+		return Message::sendMessage(source()->name(),
+							 "Triggered: " + (source()->on() ? QString("ON") : QString("OFF")));
 	}
 	m_receiver->turn(m_setValue);
 }

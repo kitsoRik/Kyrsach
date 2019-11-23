@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         Data/buffer.cpp \
         Data/command.cpp \
+        Data/controlersettings.cpp \
         Data/item.cpp \
         Data/itemaction.cpp \
         Data/itemactions.cpp \
@@ -53,6 +54,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     Data/buffer.h \
     Data/command.h \
+    Data/controlersettings.h \
     Data/item.h \
     Data/itemaction.h \
     Data/itemactions.h \

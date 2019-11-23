@@ -53,12 +53,40 @@ Rectangle {
         width: parent.width;
         height: 180;
         spacing: 5;
+
+        Rectangle {
+            Layout.preferredHeight: 30;
+            Layout.preferredWidth: 30;
+
+            color: client.controlerSocket.connectToWifi ? "green" : "red";
+
+            Text {
+                text: "WiFi";
+                anchors.fill: parent;
+            }
+        }
+
+        Rectangle {
+            Layout.preferredHeight: 30;
+            Layout.preferredWidth: 30;
+
+            color: client.controlerSocket.connectToServer ? "green" : "red";
+
+            Text {
+                text: "WiFi";
+                anchors.fill: parent;
+            }
+        }
+
         TextField {
             id: ssidField;
             Layout.alignment: Qt.AlignCenter;
             Layout.preferredWidth: parent.width / 3;
             Layout.preferredHeight: 60;
+            text: client.controlerSocket.ssid;
             placeholderText: "Ssid...";
+
+            onTextEdited: client.controlerSocket.ssid = text;
         }
         TextField {
             id: passWiFiField;
@@ -66,6 +94,9 @@ Rectangle {
             Layout.preferredWidth: parent.width / 3;
             Layout.preferredHeight: 60;
             placeholderText: "Password...";
+            text: client.controlerSocket.password;
+
+            onTextEdited: client.controlerSocket.password = text;
         }
         Button {
             Layout.alignment: Qt.AlignCenter;
@@ -75,7 +106,7 @@ Rectangle {
             text: "Connect";
 
             onClicked: {
-                client.controlerSocket.writeSsidPassword(ssidField.text, passWiFiField.text);
+                client.controlerSocket.saveSettings();
             }
         }
     }

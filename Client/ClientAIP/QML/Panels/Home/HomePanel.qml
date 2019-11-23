@@ -325,6 +325,10 @@ Rectangle {
         visible: false;
 
         anchors.fill: parent;
+
+        onVisibleChanged: {
+            drawer.visible = !visible;
+        }
     }
 
     AddUserPanel {
@@ -334,10 +338,7 @@ Rectangle {
         anchors.fill: parent;
 
         onVisibleChanged: {
-            if(visible)
-                drawer.visible = false;
-            else
-                drawer.visible = true;
+            drawer.visible = !visible;
         }
     }
 
@@ -346,6 +347,10 @@ Rectangle {
         visible: false;
 
         anchors.fill: parent;
+
+        onVisibleChanged: {
+            drawer.visible = !visible;
+        }
     }
 
     EditRoomPanel {

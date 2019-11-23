@@ -8,6 +8,7 @@
 #include "Data/command.h"
 #include "Data/room.h"
 #include "Data/buffer.h"
+#include "Data/controlersettings.h"
 #include "Objects/MagSigObject.h"
 #include "Objects/ReleObject.h"
 #include "Objects/ServoObject.h"
@@ -30,7 +31,7 @@ public:
     bool connectToWifi(const int &wait = 30000);
     bool connectToHost(const int &wait = 30000);
 
-    void reconnectToWiFi(char *ssid, char *password);
+    void reconnectToWiFi(const char *ssid, const char *password);
 
     void updateAP();
     bool checkConnect();
@@ -40,6 +41,8 @@ public:
     void parseCommand(const Command& command);
 
     bool checkItemForPassability(Item &item);
+
+    void updateAPClients();
 
     void updateItems();
     void updateRooms();
