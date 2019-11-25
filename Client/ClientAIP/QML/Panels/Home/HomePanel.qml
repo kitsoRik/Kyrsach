@@ -273,6 +273,14 @@ Rectangle {
                     }
 
                     Rectangle {
+                        visible: {
+                            if(parent.parent.qtItem.type == "SERVO")
+                                return false;
+                            if(parent.parent.qtItem.type == "CAMERA")
+                                return false;
+                            return true;
+                        }
+
                         Layout.fillHeight: true;
                         Layout.preferredWidth: height;
                         color: parent.parent.qtItem.on ? "green" : "red";
@@ -318,6 +326,10 @@ Rectangle {
         visible: false;
 
         anchors.fill: parent;
+
+        onVisibleChanged: {
+            drawer.visible = !visible;
+        }
     }
 
     AddItemPanel {
@@ -325,10 +337,6 @@ Rectangle {
         visible: false;
 
         anchors.fill: parent;
-
-        onVisibleChanged: {
-            drawer.visible = !visible;
-        }
     }
 
     AddUserPanel {

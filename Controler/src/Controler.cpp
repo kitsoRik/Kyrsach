@@ -7,7 +7,9 @@ Controler *Controler::m_instance = nullptr;
 Controler::Controler(const char* host) 
 	: m_key("KEYROSTIK"),
 	  m_host(host),
-	  m_port(3000)
+	  m_port(3000),
+		m_connectedToWiFi(false),
+		m_connectedToHost(false)
 {
 	EEPROM.commit();
 	int ssidlength = readString(0, m_ssid);
@@ -37,6 +39,8 @@ Controler::Controler(const char* host)
 bool Controler::connectToWifi(const int &wait)
 {
 	ulong timer = millis();
+	WiFi.disconnect();
+	WiFi.begin(m_ssid, m_password);
 	
 	if (WiFi.isConnected())
 	{
@@ -45,9 +49,7 @@ bool Controler::connectToWifi(const int &wait)
 	}
 	else
 	{
-		WiFi.disconnect();
-		WiFi.begin(m_ssid, m_password);
-		//Serial.println("Error connected WiFi.");
+		Serial.println("Error connected WiFi.");
 		delay(1000);
 	}
 	
@@ -58,15 +60,6 @@ bool Controler::connectToHost(const int &wait)
 {
 	ulong timer = millis();
 	m_client->connect(m_host, 3000);
-	while (!m_client->connected())
-	{
-		Serial.print('.');
-		delay(50);
-		if (wait == -1)
-			continue;
-		if (timer + wait < millis())
-			break;
-	}
 	Serial.println("");
 	if (m_client->connected())
 	{
@@ -75,6 +68,7 @@ bool Controler::connectToHost(const int &wait)
 	}
 	else
 	{
+		m_client->connect(m_host, 3000);
 		Serial.println("Error connected client.");
 	}
 	
@@ -89,9 +83,6 @@ bool Controler::connectToHost(const int &wait)
 void Controler::reconnectToWiFi(const char *ssid, 
 								const char *password)
 {
-	Serial.print("CHANGED SSID AND PASSWORD: ");
-	Serial.print(ssid);
-	Serial.println(password);
 	
     int ssidSize = -1, passSize = -1;
     while(ssid[++ssidSize]);
@@ -164,10 +155,6 @@ void Controler::updateAP()
             ControlerSettings settings = ControlerSettings::fromBuffer(buffer);
 
             reconnectToWiFi(settings.ssid.c_str(), settings.password.c_str());
-
-            Serial.println("CHANGED");
-            Serial.println(settings.ssid.c_str());
-            Serial.println(settings.password.c_str());
 		}
 	}
 }
@@ -182,7 +169,27 @@ bool Controler::checkConnect()
 	{
 		connectToHost(1000);
 	}
-	return (WiFi.isConnected() && m_client->connected());
+
+	bool connectToWifi = WiFi.isConnected();
+	bool connectToHost = m_client->connected();
+
+	bool flag = false;
+
+	if(connectToWifi != m_connectedToHost)
+	{
+		m_connectedToWiFi = connectToWifi;
+		flag = true;
+	}
+	if(connectToHost != m_connectedToHost)
+	{
+		m_connectedToHost = connectToHost;
+		flag = true;
+	}
+
+	if(flag)
+		updateAPClients();
+
+	return (connectToWifi && connectToHost);
 }
 
 bool Controler::checkAvailable()
@@ -247,7 +254,6 @@ void Controler::monitorChanges()
 						changes = true;
 						item->on = mag->value();
 						triggerItem(item);
-						Serial.println("MAGCHANGED");
 					}
 					break;
 				}
@@ -292,7 +298,6 @@ void Controler::parseCommand(const Command &command)
 				{
 					Room temp_room = Room::fromBuffer(command.buffer());
 					Room *room = m_rooms->addRoom(temp_room);
-					Serial.println("ROOM ADDED");
 					updateRooms();
 					break;
 				}
@@ -317,8 +322,6 @@ void Controler::parseCommand(const Command &command)
 					ArduinoObject *object;
 					if (item->type == Item::Led)
 					{
-						Serial.print("ADD LED: ");
-						Serial.println(item->pins[0]);
 						object = new LedObject(item->pins[0]);
 					}
 					else if (item->type == Item::Servo)
@@ -327,13 +330,10 @@ void Controler::parseCommand(const Command &command)
 						static_cast<ServoObject *>(object)->rotate(90);
 					}else if(item->type == Item::MagSig)
 					{
-						Serial.print("ADD MAGSIG: ");
-						Serial.println(item->pins[0]);
 						item->monitor = true;
 						object = new MagSigObject(item->pins[0]);
 					}else if(item->type == Item::Camera)
 					{
-						Serial.println("SADD CAMERA");
 						object = new ArduinoCameraOV7670Object(item->pins[0], 
 								item->pins[1], 
 								item->pins[2], 
@@ -348,7 +348,6 @@ void Controler::parseCommand(const Command &command)
 								item->pins[11], 
 								item->pins[12], 
 								item->pins[13]);
-						Serial.println("SADD CAMERA");
 					}else 
 					{
 						Serial.println("ADD ERROR");
@@ -379,13 +378,10 @@ void Controler::parseCommand(const Command &command)
 					{
 						if(!obj)
 						{
-							Serial.println("NEOBJ");
 							continue;
 						}
 						if (obj->identifier() == temp_item.identifier)
 						{
-							Serial.print("CHECK PIN: ");
-							Serial.println(obj->pin());
 							switch (temp_item.type)
 							{
 								case Item::Servo:
@@ -412,16 +408,11 @@ void Controler::parseCommand(const Command &command)
 								}
 								case Item::Camera:
 								{
-									Serial.println("UPDCAM1");
 									ArduinoCameraOV7670Object *cam = static_cast<ArduinoCameraOV7670Object *>(obj);
 									Serial.println((cam == nullptr));
-									Serial.println("UPDCAM12");
 									item->dataSize = 9666;
-									Serial.println("UPDCAM13");
 									cam->oneFrame();
-									Serial.println("UPDCAM2");
 									item->data = new unsigned char[9666];
-									Serial.println("UPDCAM3");
 									
 									Serial.println( ArduinoCameraOV7670Object::headerSize + cam->width() * cam->height() * 2);
 									
@@ -429,7 +420,6 @@ void Controler::parseCommand(const Command &command)
 										item->data[i] = ArduinoCameraOV7670Object::bmpHeader[i];
 									for(int i = ArduinoCameraOV7670Object::headerSize; i < 9666; i++)
 										item->data[i] = cam->frame()[i-ArduinoCameraOV7670Object::headerSize];
-									Serial.println("UPDCAM4");
 									break;
 								}
 								default:
@@ -459,7 +449,9 @@ void Controler::parseCommand(const Command &command)
 					Buffer buffer = m_rooms->toBuffer();
 					Command command(Command::Control, Command::UpdateRooms, buffer);
 					buffer = command.toBuffer();
-					m_client->write(buffer.toBytes(), buffer.fullSize());
+					char *s = buffer.toBytes();
+					m_client->write(s, buffer.fullSize());
+					delete[] s;
 					break;
 				}
 					break;
@@ -468,7 +460,9 @@ void Controler::parseCommand(const Command &command)
 			{
 				Command command(Command::ConfirmConnection);
 				Buffer buffer = command.toBuffer();
-				m_client->write(buffer.toBytes(), buffer.fullSize());
+				char *s = buffer.toBytes();
+				m_client->write(s, buffer.fullSize());
+				delete[] s;
 				break;
 			}
 			}
@@ -485,8 +479,8 @@ void Controler::updateAPClients()
     
     settings.ssid = m_ssid;
     settings.password = m_password;
-    settings.connectedToWiFi = WiFi.isConnected();
-    settings.connectedToServer = m_client->connected();
+    settings.connectedToWiFi = m_connectedToWiFi;
+    settings.connectedToServer = m_connectedToHost;
 
     Buffer buffer = settings.toBuffer();
 
@@ -496,8 +490,9 @@ void Controler::updateAPClients()
 			continue;
 		if(!client->connected())
 			continue;
-
-		client->write(buffer.toBytes(), buffer.fullSize());
+		char *s = buffer.toBytes();
+		client->write(s, buffer.fullSize());
+		delete[] s;
 	}
 }
 
@@ -510,6 +505,7 @@ void Controler::updateRooms()
 	Buffer newb = c.toBuffer();
 	auto s = newb.toBytes();
 	m_client->write(s, newb.fullSize());
+	delete[] s;
 }
 
 void Controler::triggerItem(const Item *item)
@@ -526,8 +522,9 @@ void Controler::onConnected()
 	auto ds = c.toBuffer();
 	Serial.print("BUFFSIZE:");
 	Serial.println(c.buffer().size);
-	m_client->write(ds.toBytes(), ds.fullSize());
-	
+	char *bytes = ds.toBytes();
+	m_client->write(bytes, ds.fullSize());
+	delete[] bytes;
 	updateRooms();
 }
 

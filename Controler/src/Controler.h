@@ -88,6 +88,9 @@ private:
     const char *m_host;
     uint16_t m_port;
 
+    bool m_connectedToWiFi;
+    bool m_connectedToHost;
+
     WiFiClient *m_client;
     
 

@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QBuffer>
 
-QtItem::QtItem(QtItems *items) : QObject(items), m_firstName(false)
+QtItem::QtItem(QtItems *items) : QObject(items), m_firstName(false), m_canPressCamera(false)
 {
 	m_items = items;
 	m_itemActions = new ItemActions(this);
@@ -38,6 +38,9 @@ void QtItem::setItem(const Item &item)
 	{
 		QImage img = QImage::fromData(item.data, item.dataSize);
 		setImage(img);
+		m_canPressCamera = true;
+		if(m_pressCamera)
+			turnCamera();
 	}
 
 	if(!m_firstName)
@@ -158,6 +161,9 @@ void QtItem::turnMagSig()
 
 void QtItem::turnCamera()
 {
+	if(!m_canPressCamera)
+		return;
+	m_canPressCamera = false;
 	Client *client = Client::instance();
 	Item item = m_item;
 
@@ -173,6 +179,17 @@ void QtItem::turnCamera()
 void QtItem::addLed()
 {
 	Client *client = Client::instance();
+}
+
+bool QtItem::pressCamera() const
+{
+	return m_pressCamera;
+}
+
+void QtItem::setPressCamera(bool pressCamera)
+{
+	m_pressCamera = pressCamera;
+	emit pressCameraChanged();
 }
 
 QString QtItem::image() const

@@ -25,6 +25,8 @@ class QtItem : public QObject
 	Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
 	Q_PROPERTY(QString image READ image NOTIFY imageChanged)
 
+	Q_PROPERTY(bool pressCamera READ pressCamera WRITE setPressCamera NOTIFY pressCameraChanged)
+
 	friend class QtItems;
 public:
 	explicit QtItem(QtItems* items = nullptr);
@@ -46,6 +48,9 @@ public:
 	QString image() const;
 	void setImage(const QImage &image);
 
+	bool pressCamera() const;
+	void setPressCamera(bool pressCamera);
+
 signals:
 	void pinChanged();
 	void typeChanged();
@@ -54,6 +59,8 @@ signals:
 
 	void nameChanged();
 	void imageChanged();
+
+	void pressCameraChanged();
 
 public slots:
 	void turn();
@@ -73,6 +80,9 @@ private:
 
 	bool m_firstName;
 	QString m_name;
+
+	bool m_pressCamera;
+	bool m_canPressCamera;
 };
 
 #endif // QTITEM_H

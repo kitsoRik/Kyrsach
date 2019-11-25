@@ -31,6 +31,8 @@ ControlerSocket::ControlerSocket(QObject *parent) : QObject(parent)
 
 		stream >> m_settings;
 
+		qDebug() << m_settings.connectedToWiFi << m_settings.connectedToServer;
+
 		emit ssidChanged();
 		emit passwordChanged();
 		emit connectToWiFiChanged();

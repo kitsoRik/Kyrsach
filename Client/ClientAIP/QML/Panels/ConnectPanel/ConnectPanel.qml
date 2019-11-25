@@ -58,10 +58,10 @@ Rectangle {
             Layout.preferredHeight: 30;
             Layout.preferredWidth: 30;
 
-            color: client.controlerSocket.connectToWifi ? "green" : "red";
+            color:  client.controlerSocket.connectToWiFi ? "green" : "red";
 
             Text {
-                text: "WiFi";
+                text: "WIFI";
                 anchors.fill: parent;
             }
         }
@@ -73,7 +73,7 @@ Rectangle {
             color: client.controlerSocket.connectToServer ? "green" : "red";
 
             Text {
-                text: "WiFi";
+                text: "HOST";
                 anchors.fill: parent;
             }
         }
