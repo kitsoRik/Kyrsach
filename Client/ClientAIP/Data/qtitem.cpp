@@ -168,8 +168,8 @@ void QtItem::turnCamera()
 	Item item = m_item;
 
 	item.dataSize = 0;
-	delete item.data;
-
+	delete[] item.data;
+	item.data = nullptr;
 	item.on = true;
 	item.type = Item::Camera;
 
@@ -207,7 +207,6 @@ QString QtItem::image() const
 
 void QtItem::setImage(const QImage &image)
 {
-	 // Some init code to setup the image (e.g. loading a PGN/JPEG, etc.)
 
 	m_image = image;
 	emit imageChanged();

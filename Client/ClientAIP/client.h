@@ -4,7 +4,6 @@
 #include "Objects/clientsocket.h"
 #include "Data/qtrooms.h"
 #include "Objects/usersobject.h"
-#include "Objects/blueboothsocket.h"
 #include "Objects/controlersocket.h"
 
 class Client : public QObject
@@ -50,7 +49,6 @@ private:
 	bool m_isAdmin;
 	QString m_login;
 	ClientSocket *m_clientSocket;
-	BlueboothSocket *m_bluetoothSocket;
 	ControlerSocket *m_controlerSocket;
 
 	QtRooms *m_rooms;

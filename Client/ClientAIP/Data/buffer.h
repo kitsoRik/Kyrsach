@@ -44,6 +44,7 @@ public:
 
 	char& operator[](const unsigned int& index);
 	operator const char* ();
+
 };
 
 class BufferStream

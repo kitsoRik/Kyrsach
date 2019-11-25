@@ -6,7 +6,6 @@ Client::Client(QObject *parent) : QObject(parent), m_isAdmin(true)
 {
 	m_instance = this;
 	m_clientSocket = new ClientSocket(this);
-	m_bluetoothSocket = new BlueboothSocket(this);
 	m_controlerSocket = new ControlerSocket(this);
 
 	m_rooms = new QtRooms(this);

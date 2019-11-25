@@ -196,8 +196,6 @@ Buffer& Buffer::operator=(const Buffer &buffer)
 {
 	if(this->array)
 	{
-		Serial.print("SIZE WHEN DEL: ");
-		Serial.println(this->size);
 		delete[] this->array;
 		this->array = nullptr;
 	}

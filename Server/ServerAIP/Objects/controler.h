@@ -68,6 +68,8 @@ private:
 
 	bool m_confirmedConnection;
 
+
+	void m_setSocketSettings();
 };
 
 #endif // CONTROLER_H

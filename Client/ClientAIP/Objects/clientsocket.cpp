@@ -34,7 +34,9 @@ void ClientSocket::connectToControler(const QString &key, const QString &login, 
 	Command command(Command::Connect2Controler, (key + '|' + login + '|' + password).toStdString());
 
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void ClientSocket::addRoom(const QString &name)
@@ -44,19 +46,18 @@ void ClientSocket::addRoom(const QString &name)
 
 	Command command(Command::Control, Command::AddRoom, room.toBuffer());
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void ClientSocket::addItem(const QList<int> &pins, const QString &type, const QString &roomName)
 {
-	qDebug() << "ADD ITEM IN ROOMNAME" << roomName;
 	Item item;
 	item.pins.resize(pins.size());
 	for(int i =0; i < pins.size(); i++)
 		item.pins[i] = pins[i];
 	item.roomIdentifier = roomName.toStdString();
-	qDebug() << pins;
-	qDebug() << item.pins;
 	if(type == "LED")
 		item.type = Item::Led;
 	else if(type == "SERVO")
@@ -69,29 +70,36 @@ void ClientSocket::addItem(const QList<int> &pins, const QString &type, const QS
 
 	Command command(Command::Control, Command::AddItem, item.toBuffer());
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
-	qDebug() << "ADD" << type;
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void ClientSocket::turnItem(const Item &item)
 {
 	Command command(Command::Control, Command::TurnItem, item.toBuffer());
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void ClientSocket::updateItems()
 {
 	Command command(Command::Control, Command::UpdateItems);
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void ClientSocket::updateRooms()
 {
 	Command command(Command::Control, Command::UpdateRooms);
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void ClientSocket::addUser(const QString &login, const QString &password)
@@ -102,14 +110,18 @@ void ClientSocket::addUser(const QString &login, const QString &password)
 	stream << u;
 	Command command(Command::Settings, Command::AddUser, buffer);
 	buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void ClientSocket::onConnected()
 {
 	qDebug() << "CLIENT CONNECTED";
 	Buffer buffer = Command(Command::Confirm, Command::Android, "KEYROSTIK").toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 
 	m_connectedToServer = true;
 	emit connectedToServerChanged();
@@ -150,7 +162,6 @@ void ClientSocket::onReadyReadCheck(QByteArray data)
 	if(!writedata)
 		return;
 	allData += data;
-	qDebug() << "SUM" << allData.size();
 	if(allData.size() == alldatasize)
 	{
 		writedata = false;
@@ -179,7 +190,6 @@ void ClientSocket::onReadyReadProccess(QByteArray data)
 			case Command::ConfirmConnect2Controler:
 			{
 				QString adminStr = QString::fromStdString(c.buffer().split(' ')[0]);
-				qDebug() << adminStr;
 				Client::instance()->setIsAdmin(adminStr == "ADMIN");
 				m_connectedToControler = true;
 				emit connectedToControlerChanged();
@@ -191,18 +201,13 @@ void ClientSocket::onReadyReadProccess(QByteArray data)
 				{
 					case Command::UpdateItems:
 					{
-						qDebug() << "UPDITS";
 						Items items = Items::fromBuffer(c.buffer());
-						qDebug() << items.m_items.size();
-						qDebug() << "UPDITS2";
 						break;
 					}
 					case Command::UpdateRooms:
 					{
-						qDebug() << "UPDRMS";
 						Rooms rooms = Rooms::fromBuffer(c.buffer());
 						Client::instance()->setRooms(rooms);
-						qDebug() << "UPDRMS2";
 						break;
 					}
 					case Command::TriggeredItem:

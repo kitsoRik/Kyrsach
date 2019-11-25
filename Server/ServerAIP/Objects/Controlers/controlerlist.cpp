@@ -15,7 +15,6 @@ Controler *ControlerList::fromKey(const QString &key)
 {
 	for(auto controler : m_controlers)
 	{
-		qDebug() << controler->key();
 		if(controler->key() == key)
 			return controler;
 	}
@@ -48,7 +47,9 @@ void ControlerList::addControler(Controler *controler)
 		controler->m_confirmedConnection = false;
 		Command command(Command::ConfirmConnection);
 		Buffer buffer = command.toBuffer();
-		controler->m_socket->write(buffer.toBytes(), buffer.fullSize());
+		char *s = buffer.toBytes();
+		controler->m_socket->write(s, buffer.fullSize());
+		delete[] s;
 	});
 }
 

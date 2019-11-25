@@ -54,7 +54,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "21";
                 placeholderText: "SOID";
             }
 
@@ -63,7 +63,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "22";
                 placeholderText: "SOIC";
             }
 
@@ -72,7 +72,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "34";
                 placeholderText: "VSYNC";
             }
 
@@ -81,7 +81,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "35"
                 placeholderText: "HREF";
             }
 
@@ -90,7 +90,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "32";
                 placeholderText: "XCLK";
             }
 
@@ -99,7 +99,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "33";
                 placeholderText: "PCLK";
             }
 
@@ -108,7 +108,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "27";
                 placeholderText: "D0";
             }
 
@@ -117,7 +117,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "17";
                 placeholderText: "D1";
             }
 
@@ -126,7 +126,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "16";
                 placeholderText: "D2";
             }
 
@@ -135,7 +135,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "15";
                 placeholderText: "D3";
             }
 
@@ -144,7 +144,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "14";
                 placeholderText: "D4";
             }
 
@@ -153,7 +153,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "13";
                 placeholderText: "D5";
             }
 
@@ -162,7 +162,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "12";
                 placeholderText: "D6";
             }
 
@@ -171,7 +171,7 @@ Rectangle {
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 50;
                 visible: itemTypeBox.currentText === "CAMERA";
-
+                text: "2";
                 placeholderText: "D7";
             }
 
@@ -186,23 +186,22 @@ Rectangle {
                     let arr;
 
                     if(itemTypeBox.currentText == "CAMERA")
-                        arr = [21,22,34,35,32,33,27,17,16,15,14,13,12,2];
-//                    arr = [textFieldSIOD.text,
-//                               textFieldSIOC.text,
-//                               textFieldVSYNC.text,
-//                               textFieldHREF.text,
-//                        textFieldXCLK.text,
-//                        textFieldPCLK.text,
-//                               textFieldD0.text,
-//                               textFieldD1.text,
-//                               textFieldD2.text,
-//                               textFieldD3.text,
-//                               textFieldD4.text,
-//                               textFieldD5.text,
-//                               textFieldD6.text,
-//                               textFieldD7.text];
+                        arr = [textFieldSIOD.text,
+                               textFieldSIOC.text,
+                               textFieldVSYNC.text,
+                               textFieldHREF.text,
+                               textFieldXCLK.text,
+                               textFieldPCLK.text,
+                               textFieldD0.text,
+                               textFieldD1.text,
+                               textFieldD2.text,
+                               textFieldD3.text,
+                               textFieldD4.text,
+                               textFieldD5.text,
+                               textFieldD6.text,
+                               textFieldD7.text];
                     else
-                    arr = [pinField.text];
+                        arr = [pinField.text];
                     client.clientSocket.addItem(arr, itemTypeBox.currentText, globalQtRoom.identifier);
                     addItemPanel.visible = false;
                 }

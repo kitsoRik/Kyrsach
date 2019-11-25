@@ -28,7 +28,6 @@ SOURCES += \
         Data/qtrooms.cpp \
         Data/room.cpp \
         Data/user.cpp \
-        Objects/blueboothsocket.cpp \
         Objects/clientsocket.cpp \
         Objects/controlersocket.cpp \
         Objects/userobject.cpp \
@@ -64,7 +63,6 @@ HEADERS += \
     Data/qtrooms.h \
     Data/room.h \
     Data/user.h \
-    Objects/blueboothsocket.h \
     Objects/clientsocket.h \
     Objects/controlersocket.h \
     Objects/userobject.h \

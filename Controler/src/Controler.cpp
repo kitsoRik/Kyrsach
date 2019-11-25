@@ -60,7 +60,6 @@ bool Controler::connectToHost(const int &wait)
 {
 	ulong timer = millis();
 	m_client->connect(m_host, 3000);
-	Serial.println("");
 	if (m_client->connected())
 	{
 		Serial.print("Connected to ");
@@ -146,7 +145,6 @@ void Controler::updateAP()
             for(int i = 0; i < 4; i++)
                 s[i] = client->read();
             int readSize = *reinterpret_cast<int *>(s);
-            Serial.println(readSize);
             while (client->available())
             {
                 buffer.append((char)client->read());
@@ -199,21 +197,15 @@ bool Controler::checkAvailable()
 
 void Controler::readAvailable()
 {
-	Serial.println(m_client->available());
 	Buffer buffer;
 	char *s = new char[4];
 	for(int i = 0; i < 4; i++)
 		s[i] = m_client->read();
 	int readSize = *reinterpret_cast<int *>(s);
-	Serial.println(readSize);
 	while (m_client->available())
 	{
 		buffer.append((char)m_client->read());
 	}
-	// for (int i = 0; i < buffer.size; i++)
-	// {
-	//     Serial.print(int(buffer.array[i]));
-	// }
 	Commands commands = Commands::fromBuffer(buffer);
 	for (unsigned int i = 0; i < commands.commands.size(); i++)
 		parseCommand(commands.commands.at(i));
@@ -371,9 +363,7 @@ void Controler::parseCommand(const Command &command)
 					
 					if(!item)
 						return;
-					
-					Serial.println(temp_item.type);
-					Serial.println(temp_item.pins[0]);
+
 					for (ArduinoObject *obj : m_objects)
 					{
 						if(!obj)
@@ -409,12 +399,9 @@ void Controler::parseCommand(const Command &command)
 								case Item::Camera:
 								{
 									ArduinoCameraOV7670Object *cam = static_cast<ArduinoCameraOV7670Object *>(obj);
-									Serial.println((cam == nullptr));
 									item->dataSize = 9666;
 									cam->oneFrame();
 									item->data = new unsigned char[9666];
-									
-									Serial.println( ArduinoCameraOV7670Object::headerSize + cam->width() * cam->height() * 2);
 									
 									for(int i = 0; i < ArduinoCameraOV7670Object::headerSize; i++)
 										item->data[i] = ArduinoCameraOV7670Object::bmpHeader[i];
@@ -520,53 +507,10 @@ void Controler::onConnected()
 {
 	Command c(Command::Confirm, Command::Controler, m_key);
 	auto ds = c.toBuffer();
-	Serial.print("BUFFSIZE:");
-	Serial.println(c.buffer().size);
 	char *bytes = ds.toBytes();
 	m_client->write(bytes, ds.fullSize());
 	delete[] bytes;
 	updateRooms();
-}
-
-void readSsidPassword()
-{
-	//   uint8_t ssidSize = 0, passSize = 0;
-	
-	//   ssidSize = EEPROM.read(0);
-	//   ssid = new char[ssidSize + 1];
-	//   passSize = EEPROM.read(ssidSize + 1);
-	//   password = new char[passSize + 1];
-	//   for(int i = 0; i < ssidSize; i++)
-	//     ssid[i] = EEPROM.read(i+1);
-	//   for(int i = 0; i < passSize; i++)
-	//     password[i] = EEPROM.read(i + 1 + ssidSize + 1);
-	
-	//     ssid[ssidSize] = 0;
-	//     password[passSize] = 0;
-}
-
-void writeSsidPassword()
-{
-	// uint8_t ssidSize = -1, passSize = -1;
-	// while(ssid[++ssidSize]);
-	// while(password[++passSize]);
-	
-	// EEPROM.write(0, ssidSize); // 0
-	// for(int i = 0; i < ssidSize; i++)
-	//     EEPROM.write(i + 1, ssid[i]); // 1,2,3
-	// EEPROM.write(ssidSize + 1, passSize); // 4
-	// for(int i = 0; i < passSize; i++)
-	//     EEPROM.write(i + 1 + ssidSize + 1, password[i]); // 5,6,7
-	
-	// Serial.print("WRITE: ");
-	// Serial.println(ssid);
-	// Serial.print("WRITE: ");
-	// Serial.println(password);
-	// Serial.println("WRITEEND");
-	
-	// Serial.println(passSize);
-	
-	// EEPROM.commit();
 }
 
 std::vector<std::string> split(const std::string &str, const char sep)

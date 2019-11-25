@@ -18,7 +18,9 @@ void AbstractClient::confirmConnect2Controler(const bool &isAdmin)
 	Command command(Command::ConfirmConnect2Controler);
 	command.setBuffer(isAdmin ? "ADMIN" : "USER");
 	Buffer buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void AbstractClient::sendUsersInfoToAdmin(const QList<User> &users)
@@ -34,7 +36,9 @@ void AbstractClient::sendUsersInfoToAdmin(const QList<User> &users)
 
 	Command command (Command::Settings, Command::UsersInfo, buffer);
 	buffer = command.toBuffer();
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void AbstractClient::onConnected()

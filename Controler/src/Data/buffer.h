@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 #endif
-#include <Arduino.h>
 
 class BufferStream;
 

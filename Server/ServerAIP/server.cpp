@@ -16,7 +16,6 @@ Server::Server(QObject *parent) : QObject(parent)
 		qDebug() << "Error listen server: " <<  m_server->errorString();
 		qApp->quit();
 	}
-	qDebug() << m_server->serverAddress();
 
 	qDebug() << "Listening " << QString::number(PORT) + " port..";
 
@@ -53,7 +52,6 @@ void Server::onConfirmOS(const Command &command, QTcpSocket *socket)
 			Controler *controler = m_controlers.fromKey(key);
 			if(controler)
 			{
-				qDebug() << "C";
 				controler->changeSocket(socket);
 			}else
 			{

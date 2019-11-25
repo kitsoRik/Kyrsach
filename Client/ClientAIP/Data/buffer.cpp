@@ -5,8 +5,10 @@ Buffer::Buffer() : size(0), array(nullptr)
 
 }
 
-Buffer::Buffer(const Buffer &buffer)
+Buffer::Buffer(const Buffer &buffer) : Buffer()
 {
+	if(buffer.size == 0)
+		return;
 	size = buffer.size;
 	this->array = new char[size];
 	for (int i = 0; i < size; i++)
@@ -14,17 +16,17 @@ Buffer::Buffer(const Buffer &buffer)
 
 }
 
-Buffer::Buffer(char* s)
+Buffer::Buffer(char* s) : Buffer()
 {
 	*this = fromUtf8(static_cast<const char*>(s));
 }
 
-Buffer::Buffer(const char* s)
+Buffer::Buffer(const char* s) : Buffer()
 {
 	*this = fromUtf8(s);
 }
 
-Buffer::Buffer(const std::string& str)
+Buffer::Buffer(const std::string& str) : Buffer()
 {
 	*this = fromUtf8(str);
 }
@@ -62,7 +64,7 @@ void Buffer::resize(const unsigned int& size)
 
 	this->size = size;
 
-	delete array;
+	delete[] array;
 	array = s;
 }
 

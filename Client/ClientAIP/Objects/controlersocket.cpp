@@ -22,16 +22,12 @@ ControlerSocket::ControlerSocket(QObject *parent) : QObject(parent)
 	});
 	connect(m_socket, &QTcpSocket::readyRead, [this]()
 	{
-		qDebug() << "READYREAD";
 		auto data = m_socket->readAll();
-		qDebug() << data.size();
 
 		Buffer buffer = Buffer::fromBytes(data);
 		BufferStream stream (&buffer, BufferStream::ReadOnly);
 
 		stream >> m_settings;
-
-		qDebug() << m_settings.connectedToWiFi << m_settings.connectedToServer;
 
 		emit ssidChanged();
 		emit passwordChanged();
@@ -96,5 +92,7 @@ void ControlerSocket::saveSettings() const
 
 	stream << m_settings;
 
-	m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }

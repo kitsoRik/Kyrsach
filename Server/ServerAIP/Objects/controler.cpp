@@ -9,9 +9,7 @@ Controler::Controler(QTcpSocket *socket, QObject *parent)
 	if(socket == nullptr)
 		throw "Null socket";
 
-	connect(m_socket, &QTcpSocket::connected, this, &Controler::onConnected);
-	connect(m_socket, &QTcpSocket::disconnected, this, &Controler::onDisconnected);
-	connect(m_socket, &QTcpSocket::readyRead, this, &Controler::onReadyRead);
+	m_setSocketSettings();
 
 	qDebug() << "CONTROLER CREATED";
 }
@@ -80,7 +78,6 @@ void Controler::onReadyReadCheck(QByteArray data)
 	if(!writedata)
 		return;
 	allData += data;
-	qDebug() << "SUM" << allData.size();
 	if(allData.size() == alldatasize)
 	{
 		writedata = false;
@@ -99,7 +96,6 @@ void Controler::onReadyReadCheck(QByteArray data)
 void Controler::onReadyReadProccess(QByteArray data)
 {
 	Buffer buffer = Buffer::fromBytes(data);
-	qDebug() << buffer.size;
 	Commands commands = Commands::fromBuffer(buffer);
 	for(unsigned int i = 0; i < commands.commands.size(); i++)
 	{
@@ -120,41 +116,45 @@ void Controler::onReadyCommand(const Command &command)
 			{
 				case Command::AddRoom:
 				{
-					qDebug() << "ADDROOM";
 					Buffer buffer = command.toBuffer();
-					m_socket->write(buffer.toBytes(), buffer.fullSize());
+					char *s = buffer.toBytes();
+					m_socket->write(s, buffer.fullSize());
+					delete[] s;
 					break;
 				}
 				case Command::AddItem:
 				{
-					qDebug() << "ADDITEM";
 					Buffer buffer = command.toBuffer();
-					m_socket->write(buffer.toBytes(), buffer.fullSize());
+					char *s = buffer.toBytes();
+					m_socket->write(s, buffer.fullSize());
+					delete[] s;
 					break;
 				}
 				case Command::TurnItem:
 				{
 					Buffer buffer = command.toBuffer();
-					m_socket->write(buffer.toBytes(), buffer.fullSize());
-					qDebug() << "TURN" << command.buffer();
+					char *s = buffer.toBytes();
+					m_socket->write(s, buffer.fullSize());
+					delete[] s;
 
 					buffer = command.buffer();
 					Item item = Item::fromBuffer(buffer);
-					qDebug() << item.type;
 					break;
 				}
 				case Command::UpdateItems:
 				{
-					qDebug() << "UPDITSF";
 					Buffer buffer = command.toBuffer();
-					m_socket->write(buffer.toBytes(), buffer.fullSize());
+					char *s = buffer.toBytes();
+					m_socket->write(s, buffer.fullSize());
+					delete[] s;
 					break;
 				}
 				case Command::UpdateRooms:
 				{
-					qDebug() << "UPDRMSF";
 					Buffer buffer = command.toBuffer();
-					m_socket->write(buffer.toBytes(), buffer.fullSize());
+					char *s = buffer.toBytes();
+					m_socket->write(s, buffer.fullSize());
+					delete[] s;
 					break;
 				}
 				default:
@@ -180,7 +180,6 @@ void Controler::onReadyCommand(const Command &command)
 				}
 				case Command::AddUser:
 				{
-					qDebug() << "ADDUSER";
 					::User u;
 					Buffer buffer = command.buffer();
 					BufferStream stream (&buffer, BufferStream::ReadOnly);
@@ -198,6 +197,13 @@ void Controler::onReadyCommand(const Command &command)
 		default:
 			break;
 	}
+}
+
+void Controler::m_setSocketSettings()
+{
+	connect(m_socket, &QTcpSocket::connected, this, &Controler::onConnected);
+	connect(m_socket, &QTcpSocket::disconnected, this, &Controler::onDisconnected);
+	connect(m_socket, &QTcpSocket::readyRead, this, &Controler::onReadyRead);
 }
 
 bool Controler::confirmedConnection() const
@@ -229,6 +235,8 @@ void Controler::changeSocket(QTcpSocket *socket)
 	m_socket->disconnect();
 	m_socket->deleteLater();
 	m_socket = socket;
+
+	m_setSocketSettings();
 }
 
 void Controler::parseCommand(const Command &command)
@@ -259,8 +267,6 @@ void Controler::parseCommand(const Command &command)
 
 					Buffer buffer = command.buffer();
 					m_rooms = Rooms::fromBuffer(buffer);
-					qDebug() << "ROOMSNEW";
-					qDebug() << m_rooms.rooms.size();
 					for(auto client : m_clients)
 					{
 						updateRooms(client);
@@ -270,7 +276,6 @@ void Controler::parseCommand(const Command &command)
 				}
 				case Command::TriggeredItem:
 				{
-					qDebug() << "TRIGG";
 					Buffer buffer = command.buffer();
 					Item item = Item::fromBuffer(buffer);
 					for(auto client : m_clients)
@@ -299,7 +304,9 @@ void Controler::updateItems(AbstractClient *client)
 	Buffer buffer = m_rooms.toBuffer();
 	Command command(Command::Control, Command::UpdateItems, buffer);
 	buffer = command.toBuffer();
-	client->m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	client->m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void Controler::updateRooms(AbstractClient *client)
@@ -307,8 +314,9 @@ void Controler::updateRooms(AbstractClient *client)
 	Buffer buffer = m_rooms.toBuffer();
 	Command command(Command::Control, Command::UpdateRooms, buffer);
 	buffer = command.toBuffer();
-	client->m_socket->write(buffer.toBytes(), buffer.fullSize());
-	qDebug() << "UPR" << buffer.fullSize();
+	char *s = buffer.toBytes();
+	client->m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void Controler::triggeredItem(Item item, AbstractClient *client)
@@ -316,7 +324,9 @@ void Controler::triggeredItem(Item item, AbstractClient *client)
 	Buffer buffer = item.toBuffer();
 	Command command(Command::Control, Command::TriggeredItem, buffer);
 	buffer = command.toBuffer();
-	client->m_socket->write(buffer.toBytes(), buffer.fullSize());
+	char *s = buffer.toBytes();
+	client->m_socket->write(s, buffer.fullSize());
+	delete[] s;
 }
 
 void Controler::updateUsers()
